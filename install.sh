@@ -227,10 +227,9 @@ if [[ -d "$ROOT_DIR/genieacs/public" ]]; then
   fi
   log "UI BillingHub deployed ke $GENIEACS_NPM/public/"
   UI_BIN="$GENIEACS_NPM/bin/genieacs-ui"
-  if [[ -f "$UI_BIN" ]] && ! grep -q 'theme-toggle.js' "$UI_BIN"; then
-    sed -i 's|<link rel="stylesheet" href="${Ls}">|<link rel="stylesheet" href="${Ls}"><script>(function(){try{var t=localStorage.getItem("bh-theme");if(t==="light")document.documentElement.setAttribute("data-bh-theme","light")}catch(e){}})();</script>|' "$UI_BIN"
-    sed -i 's|<script type="module" src="${Ms}"></script>|<script src="theme-toggle.js"></script><script type="module" src="${Ms}"></script>|' "$UI_BIN"
-    log "genieacs-ui patched (theme toggle, in-place sed)."
+  if command -v node >/dev/null 2>&1 && [[ -f "$ROOT_DIR/scripts/patch-genieacs-ui-html.js" ]]; then
+    node "$ROOT_DIR/scripts/patch-genieacs-ui-html.js" "$UI_BIN"
+    log "genieacs-ui patched (viewport + theme toggle)."
   fi
   # Paksa semua bundle JS pakai logo.png (lebih reliable dari SVG hash)
   for jsf in "$GENIEACS_NPM/public"/app*.js; do

@@ -1271,27 +1271,38 @@ input {
     padding: 2px
 }
 
-.page-overview>h1 {
+#content:has(.overview-chart-group)>h1 {
     text-align: center;
-    margin: 16px 0 20px
+    margin: 0 0 4px
 }
 
-.page-overview>h1:empty {
+#content:has(.overview-chart-group)>h1:empty {
     display: none
 }
 
+#content:has(.overview-chart-group),
 #content.page-overview {
-    padding: 12px 20px 28px;
-    margin: 12px 16px
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 12px 16px 20px;
+    margin: 8px 12px;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important
+}
+
+.overview-chart-group+.overview-chart-group {
+    margin-top: 0
 }
 
 .overview-chart-group {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
+    gap: 12px;
     align-items: stretch;
     width: 100%;
-    margin-bottom: 20px
+    margin-bottom: 0
 }
 
 .overview-chart {
@@ -1299,13 +1310,13 @@ input {
     flex-direction: column;
     align-items: center;
     align-self: stretch;
-    height: 100%;
     min-height: 340px;
     min-width: 0;
     padding: 14px 14px 12px;
     background: var(--color6);
     border: 1px solid var(--color2);
-    border-radius: 10px
+    border-radius: 10px;
+    box-shadow: none
 }
 
 .overview-chart-group h2,
@@ -1457,19 +1468,265 @@ html[data-bh-theme="light"] .pie-chart>.legend>.legend-total {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .06)
 }
 
-@media (max-width: 1100px) {
-    .overview-chart-group {
-        grid-template-columns: repeat(2, minmax(0, 1fr))
+@media (max-width: 768px) {
+    #content-wrapper {
+        flex-direction: column;
+        overflow-x: auto
     }
-}
 
-@media (max-width: 720px) {
+    #header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        min-height: auto;
+        padding-bottom: 0
+    }
+
+    #header>.logo {
+        margin: 6px 0 0 8px;
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+        max-width: calc(100% - 100px)
+    }
+
+    #header>.logo>img {
+        height: 42px;
+        max-width: 200px
+    }
+
+    .bh-theme-toggle {
+        top: 8px;
+        right: 8px;
+        width: 34px;
+        height: 34px;
+        order: 2
+    }
+
+    #header>.user-menu {
+        top: 8px;
+        right: 50px;
+        font-size: 12px;
+        order: 3;
+        max-width: 42vw;
+        overflow: hidden;
+        text-overflow: ellipsis
+    }
+
+    #header>nav {
+        order: 4;
+        display: block;
+        width: 100%;
+        flex: 1 1 100%;
+        margin: 4px 0 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none
+    }
+
+    #header>nav::-webkit-scrollbar {
+        display: none
+    }
+
+    #header>nav>ul {
+        display: flex;
+        flex-wrap: nowrap;
+        margin: 0;
+        padding: 0 6px 2px;
+        white-space: nowrap
+    }
+
+    #header>nav>ul>li {
+        flex-shrink: 0;
+        margin: 0 2px
+    }
+
+    #header>nav>ul>li>:is(a, a:visited, a:hover) {
+        min-width: 0;
+        padding: 8px 14px;
+        font-size: 13px
+    }
+
+    #side-menu {
+        width: 100%;
+        min-width: 0;
+        border-right: none;
+        border-bottom: 1px solid var(--color2);
+        box-shadow: none;
+        padding-top: 4px
+    }
+
+    #side-menu>ul {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 4px;
+        padding: 0 6px 6px
+    }
+
+    #side-menu>ul>li>a {
+        margin: 0;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-left: none;
+        white-space: nowrap;
+        font-size: 13px
+    }
+
+    #side-menu>ul>li.active>a {
+        border-left: none;
+        border-bottom: 2px solid var(--bh-accent)
+    }
+
+    #content,
+    #content:not(.page-login):not(:has(.overview-chart-group)) {
+        margin: 8px;
+        padding: 4px 6px;
+        min-width: 0
+    }
+
+    #content:has(.overview-chart-group) {
+        gap: 16px;
+        padding: 8px 4px 12px;
+        margin: 4px;
+        min-width: 320px
+    }
+
     .overview-chart-group {
-        grid-template-columns: 1fr
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px
+    }
+
+    .overview-chart {
+        min-height: 240px;
+        padding: 8px 4px 6px;
+        background: var(--color6);
+        border: 1px solid var(--color2);
+        border-radius: 8px
+    }
+
+    .overview-chart-group h2,
+    .overview-chart h2 {
+        font-size: 11px;
+        margin: 0 0 4px;
+        line-height: 1.2
+    }
+
+    .pie-chart>svg {
+        width: min(28vw, 108px) !important;
+        height: min(28vw, 108px) !important;
+        max-width: 108px;
+        max-height: 108px
     }
 
     .pie-chart>.legend {
-        grid-template-columns: 1fr
+        grid-template-columns: 1fr;
+        font-size: 9px;
+        line-height: 1.25;
+        min-height: 68px;
+        column-gap: 4px;
+        row-gap: 1px
+    }
+
+    .pie-chart>.legend>.legend-line {
+        min-height: 14px;
+        gap: 4px
+    }
+
+    .pie-chart>.legend>.legend-line>.color {
+        width: 8px;
+        height: 8px
+    }
+
+    .pie-chart>.legend>.legend-total {
+        top: 4px;
+        left: 4px;
+        font-size: 8px;
+        padding: 4px 6px
+    }
+
+    table.table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch
+    }
+
+    table.table th,
+    table.table td {
+        font-size: 13px
+    }
+
+    div.tab>ul>li>:is(a, a:visited, a:hover) {
+        min-width: 0;
+        padding: 8px 10px;
+        font-size: 13px
+    }
+
+    .filter>input {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box
+    }
+
+    #content-wrapper:has(#content.page-login) {
+        padding: 20px 14px;
+        align-items: stretch;
+        min-height: 100vh;
+        box-sizing: border-box
+    }
+
+    #content.page-login {
+        max-width: none;
+        width: 100%;
+        padding: 28px 22px 24px;
+        box-sizing: border-box
+    }
+
+    #content.page-login::before {
+        max-width: 260px;
+        height: 58px;
+        margin-bottom: 12px
+    }
+
+    #content.page-login h1::after {
+        font-size: 1rem;
+        line-height: 1.45
+    }
+
+    #content.page-login label {
+        font-size: 1rem;
+        margin-bottom: 8px
+    }
+
+    #content.page-login input[type=text],
+    #content.page-login input[type=password] {
+        padding: 14px 14px;
+        font-size: 16px;
+        border-radius: 10px
+    }
+
+    #content.page-login button.primary {
+        padding: 14px 20px;
+        font-size: 16px;
+        border-radius: 10px;
+        margin-top: 8px
+    }
+
+    #content.page-login>p a,
+    #content.page-login form>p:last-child a {
+        font-size: .95rem
+    }
+}
+
+@media (max-width: 420px) {
+    #header>.user-menu {
+        font-size: 11px;
+        right: 46px
+    }
+
+    #header>nav>ul>li>:is(a, a:visited, a:hover) {
+        padding: 8px 11px;
+        font-size: 12px
     }
 }
 
@@ -1894,7 +2151,7 @@ body:has(#content.page-login) #header {
     text-decoration: underline
 }
 
-#content:not(.page-login) {
+#content:not(.page-login):not(:has(.overview-chart-group)) {
     background-color: var(--bh-card);
     border-radius: 10px;
     border: 1px solid var(--color2);
@@ -1927,7 +2184,8 @@ h2 {
 }
 
 .page-overview>h1 {
-    color: var(--color8)
+    text-align: center;
+    margin: 16px 0 20px
 }
 
 div.tab>ul>li {
@@ -2099,7 +2357,7 @@ html[data-bh-theme="light"] #side-menu>ul>li>a:hover {
     color: var(--bh-accent)
 }
 
-html[data-bh-theme="light"] #content:not(.page-login) {
+html[data-bh-theme="light"] #content:not(.page-login):not(:has(.overview-chart-group)) {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08)
 }
 

@@ -18,6 +18,11 @@ for (const file of cssTargets) {
   console.log("OK CSS:", file);
 }
 
+const patchUi = path.join(__dirname, "patch-genieacs-ui-html.js");
+if (fs.existsSync(patchUi)) {
+  require("child_process").execFileSync("node", [patchUi], { stdio: "inherit" });
+}
+
 const jsFiles = fs.readdirSync(pub).filter((f) => /^app.*\.js$/.test(f) && !f.endsWith(".map"));
 let jsPatched = 0;
 for (const file of jsFiles) {
