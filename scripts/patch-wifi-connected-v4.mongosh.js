@@ -71,14 +71,16 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
     const adParam = `${wlanBasePath}.AssociatedDevice`;
     const esc = prefix.replace(/\./g, "\\.");
 
-    // Remove v3 LAN Host tables (components 2 & 3) — caused 11 rows vs Connected 4
-    const stale = db.config
-      .find({ _id: { $regex: `^${esc}\\.components\\.(2|3)(\\.|$)` } })
-      .toArray()
-      .map((d) => d._id);
-    if (stale.length) {
-      db.config.deleteMany({ _id: { $in: stale } });
-      removedKeys += stale.length;
+    // Reset components 1–3 (v5 nested layout / v3 LAN Host) then apply v4 flat structure
+    for (const idx of [1, 2, 3]) {
+      const staleComp = db.config
+        .find({ _id: { $regex: `^${esc}\\.components\\.${idx}(\\.|$)` } })
+        .toArray()
+        .map((d) => d._id);
+      if (staleComp.length) {
+        db.config.deleteMany({ _id: { $in: staleComp } });
+        removedKeys += staleComp.length;
+      }
     }
 
     upsert(`${prefix}.filter`, wifiSectionFilter(wlan));
@@ -122,6 +124,10 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
       `${prefix}.components.0.parameters.0.components.0.parameters.1`,
       `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceMACAddress`
     );
+    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.2` });
+    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.3` });
+    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.4` });
+    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.5` });
   }
 }
 
