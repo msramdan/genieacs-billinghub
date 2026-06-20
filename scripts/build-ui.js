@@ -7,15 +7,17 @@ const root = path.join(__dirname, "..");
 const pub = path.join(root, "genieacs", "public");
 const css = fs.readFileSync(path.join(pub, "app.css"), "utf8");
 
-const cssTargets = [
-  "app-7KDYOBUH.css",
-  "app-LU66VFYW.css",
-  "app-FCLPNHUD.css",
-];
+const cssTargets = fs
+  .readdirSync(pub)
+  .filter((f) => /^app-[A-Z0-9]+\.css$/.test(f));
 
-for (const file of cssTargets) {
-  fs.writeFileSync(path.join(pub, file), css);
-  console.log("OK CSS:", file);
+if (!cssTargets.length) {
+  console.warn("Tidak ada app-*.css bundle; tulis app.css saja.");
+} else {
+  for (const file of cssTargets) {
+    fs.writeFileSync(path.join(pub, file), css);
+    console.log("OK CSS:", file, "(" + css.length + " bytes)");
+  }
 }
 
 const patchUi = path.join(__dirname, "patch-genieacs-ui-html.js");

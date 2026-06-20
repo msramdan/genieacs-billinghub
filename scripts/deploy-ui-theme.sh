@@ -16,6 +16,11 @@ if [[ ! -d "$GENIEACS_NPM/public" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$ROOT_DIR/logo.png" ]]; then
+  echo "ERROR: $ROOT_DIR/logo.png tidak ada — salin logo ACS BillingHub ke root repo dulu." >&2
+  exit 1
+fi
+
 cd "$ROOT_DIR"
 if command -v node >/dev/null 2>&1; then
   node "$ROOT_DIR/scripts/build-logo.js" 2>/dev/null || true
@@ -25,6 +30,15 @@ fi
 
 cp -r "$ROOT_DIR/genieacs/public/"* "$GENIEACS_NPM/public/"
 [[ -f "$ROOT_DIR/logo.png" ]] && cp "$ROOT_DIR/logo.png" "$GENIEACS_NPM/public/logo.png"
+
+# Pastikan semua bundle CSS GenieACS (hash beda per versi npm) dapat theme BillingHub penuh
+if [[ -f "$ROOT_DIR/genieacs/public/app.css" ]]; then
+  for cssf in "$GENIEACS_NPM/public"/app-*.css; do
+    [[ -f "$cssf" ]] || continue
+    cp "$ROOT_DIR/genieacs/public/app.css" "$cssf"
+    echo "OK: CSS theme -> $(basename "$cssf")"
+  done
+fi
 
 UI_BIN="$GENIEACS_NPM/bin/genieacs-ui"
 node "$ROOT_DIR/scripts/patch-genieacs-ui-html.js" "$UI_BIN"
