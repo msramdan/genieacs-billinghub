@@ -1,33 +1,39 @@
-// WLAN Password — multi-vendor, all SSID indices (ZTE/Huawei/FH/CMCC/TR-181)
+// WLAN Password — preserve ACS-set values (CPE often returns blank per TR-069)
 let m = "";
 
+function cleanPassword(v) {
+  if (v == null || v === undefined) return "";
+  const s = String(v).trim();
+  if (!s || s === "(write-only)" || s === "blank" || s === "(hidden)") return "";
+  return s;
+}
+
 function setPassword(value) {
+  const pw = cleanPassword(value);
+  if (!pw) return;
   for (let i = 1; i <= 8; i++) {
     declare(
       "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".PreSharedKey.1.KeyPassphrase",
       null,
-      { value: value }
+      { value: pw }
     );
     declare(
       "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".KeyPassphrase",
       null,
-      { value: value }
+      { value: pw }
     );
     declare(
       "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".PreSharedKey.1.PreSharedKey",
       null,
-      { value: value }
+      { value: pw }
     );
-    declare("Device.WiFi.AccessPoint." + i + ".Security.KeyPassphrase", null, { value: value });
-    declare("Device.WiFi.AccessPoint." + i + ".Security.PreSharedKey", null, { value: value });
+    declare("Device.WiFi.AccessPoint." + i + ".Security.KeyPassphrase", null, { value: pw });
+    declare("Device.WiFi.AccessPoint." + i + ".Security.PreSharedKey", null, { value: pw });
   }
 }
 
-if (args[1].value) {
-  m = args[1].value[0];
-  setPassword(m);
-} else {
-  let wildcards = [
+function readCached() {
+  const wildcards = [
     "InternetGatewayDevice.LANDevice.1.WLANConfiguration.*.PreSharedKey.1.KeyPassphrase",
     "InternetGatewayDevice.LANDevice.1.WLANConfiguration.*.KeyPassphrase",
     "InternetGatewayDevice.LANDevice.1.WLANConfiguration.*.PreSharedKey.1.PreSharedKey",
@@ -35,40 +41,39 @@ if (args[1].value) {
     "Device.WiFi.AccessPoint.*.Security.PreSharedKey",
   ];
 
-  for (let wp of wildcards) {
-    for (let item of declare(wp, { value: Date.now() })) {
-      if (item.value && item.value[0]) {
-        m = item.value[0];
-        break;
-      }
-    }
-    if (m) break;
-  }
-
-  if (!m) {
-    let paths = [];
-    for (let i = 1; i <= 8; i++) {
-      paths.push(
-        "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".PreSharedKey.1.KeyPassphrase"
-      );
-      paths.push(
-        "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".KeyPassphrase"
-      );
-      paths.push(
-        "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".PreSharedKey.1.PreSharedKey"
-      );
-      paths.push("Device.WiFi.AccessPoint." + i + ".Security.KeyPassphrase");
-      paths.push("Device.WiFi.AccessPoint." + i + ".Security.PreSharedKey");
-    }
-
-    for (let p of paths) {
-      let v = declare(p, { value: Date.now() });
-      if (v.size && v.value[0]) {
-        m = v.value[0];
-        break;
-      }
+  for (const wp of wildcards) {
+    const d = declare(wp, { value: 1 });
+    for (const item of d) {
+      const pw = cleanPassword(item.value && item.value[0]);
+      if (pw) return pw;
     }
   }
+
+  for (let i = 1; i <= 8; i++) {
+    const paths = [
+      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".PreSharedKey.1.KeyPassphrase",
+      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".KeyPassphrase",
+      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".PreSharedKey.1.PreSharedKey",
+      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".X_CT-COM_WPSKeyWord",
+      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + i + ".X_ZTE-COM_Password",
+      "Device.WiFi.AccessPoint." + i + ".Security.KeyPassphrase",
+      "Device.WiFi.AccessPoint." + i + ".Security.PreSharedKey",
+    ];
+    for (const p of paths) {
+      const v = declare(p, { value: 1 });
+      const pw = cleanPassword(v.size && v.value[0]);
+      if (pw) return pw;
+    }
+  }
+  return "";
+}
+
+// User SET via ACS UI / task
+if (args[1].value) {
+  m = cleanPassword(args[1].value[0]);
+  if (m) setPassword(m);
+} else {
+  m = readCached();
 }
 
 return { writable: true, value: [m, "xsd:string"] };

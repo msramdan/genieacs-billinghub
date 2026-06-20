@@ -90,7 +90,7 @@ print("OK cwmp limits");
 
 // 6. Password fallbacks only (non-breaking, matches BillingHub)
 const WLAN_PW =
-  "COALESCE(VirtualParameters.WlanPassword, PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey)";
+  "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)";
 let pw = 0;
 db.config.find({ _id: /\.parameter$/, value: /^KeyPassphrase$|^PreSharedKey\.1\.KeyPassphrase$/ }).forEach((doc) => {
   db.config.updateOne({ _id: doc._id }, { $set: { value: WLAN_PW } });

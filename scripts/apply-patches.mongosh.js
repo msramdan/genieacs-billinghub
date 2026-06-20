@@ -25,6 +25,7 @@ if (removed) print("Removed bad VPs:", removed);
 
 load(path.join(scriptsDir, "patch-index-full-fallbacks.mongosh.js"));
 load(path.join(scriptsDir, "patch-wifi-connected-v4.mongosh.js"));
+load(path.join(scriptsDir, "patch-provision-password-cache.mongosh.js"));
 load(path.join(scriptsDir, "patch-preset-default-boot.mongosh.js"));
 
 // refresh-wlan preset on inform channel

@@ -29,25 +29,20 @@ for (const doc of presets) {
 }
 print("OK: presets (" + presets.length + ")");
 
-// Patch default provision extras (MacAddress, KeyPassphrase, ConnectionRequestURL)
+// Patch default provision: ConnectionRequestURL only (password cache via patch-provision-password-cache)
 const defProv = db.provisions.findOne({ _id: "default" });
 if (defProv && defProv.script) {
   let script = defProv.script;
-  const extras = [
-    'declare("VirtualParameters.MacAddress", {path: hourly, value: hourly});',
-    'declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.*.KeyPassphrase", {path: hourly, value: hourly});',
-    'declare("InternetGatewayDevice.ManagementServer.ConnectionRequestURL", {path: update, value: update});',
-  ];
-  for (const line of extras) {
-    if (!script.includes(line)) {
-      script = script.replace(
-        'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});',
-        'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});\n' + line
-      );
-    }
+  const line =
+    'declare("InternetGatewayDevice.ManagementServer.ConnectionRequestURL", {path: update, value: update});';
+  if (!script.includes(line)) {
+    script = script.replace(
+      'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});',
+      'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});\n' + line
+    );
+    db.provisions.updateOne({ _id: "default" }, { $set: { script } });
+    print("PATCH provision: default (ConnectionRequestURL)");
   }
-  db.provisions.updateOne({ _id: "default" }, { $set: { script } });
-  print("PATCH provision: default");
 }
 
 db.cache.deleteMany({ _id: { $in: ["cwmp-local-cache-hash", "ui-local-cache-hash"] } });

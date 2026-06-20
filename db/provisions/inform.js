@@ -51,7 +51,6 @@ if (vpPhase === 0) {
   declare("VirtualParameters.IPTR069", vpTick);
   declare("VirtualParameters.PonMac", vpTick);
 } else {
-  declare("VirtualParameters.WlanPassword", vpTick);
-  declare("VirtualParameters.pppoePassword", vpTick);
+  declare("VirtualParameters.pppoePassword", { path: vpTick, value: 1 });
   declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", vpTick);
 }

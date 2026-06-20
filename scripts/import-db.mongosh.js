@@ -65,25 +65,20 @@ for (const [id, file] of Object.entries(vpOverrides)) {
   print("PATCH VP: " + id);
 }
 
-// Patch default provision: add MacAddress + KeyPassphrase refresh
+// Patch default provision: ConnectionRequestURL refresh only (passwords use value:1 via patch-provision-password-cache)
 const defProv = db.provisions.findOne({ _id: "default" });
 if (defProv && defProv.script) {
   let script = defProv.script;
-  const extras = [
-    'declare("VirtualParameters.MacAddress", {path: hourly, value: hourly});',
-    'declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.*.KeyPassphrase", {path: hourly, value: hourly});',
-    'declare("InternetGatewayDevice.ManagementServer.ConnectionRequestURL", {path: update, value: update});',
-  ];
-  for (const line of extras) {
-    if (!script.includes(line)) {
-      script = script.replace(
-        'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});',
-        'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});\n' + line
-      );
-    }
+  const line =
+    'declare("InternetGatewayDevice.ManagementServer.ConnectionRequestURL", {path: update, value: update});';
+  if (!script.includes(line)) {
+    script = script.replace(
+      'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});',
+      'declare("VirtualParameters.WlanPassword", {path: hourly, value: hourly});\n' + line
+    );
+    db.provisions.updateOne({ _id: "default" }, { $set: { script } });
+    print("PATCH provision: default (ConnectionRequestURL)");
   }
-  db.provisions.updateOne({ _id: "default" }, { $set: { script } });
-  print("PATCH provision: default");
 }
 
 // Pastikan preset inform selalu ada (jangan sampai ter-delete)
@@ -122,7 +117,7 @@ if (fs.existsSync(chartPatchFile)) {
 
 // Auto-patch remaining WLAN password fields on vendor tabs
 const COALESCE_WLAN =
-  "COALESCE(VirtualParameters.WlanPassword, PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey)";
+  "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)";
 let autoWlan = 0;
 db.config.find({ value: /KeyPassphrase|PreSharedKey\.1\.PreSharedKey/ }).forEach((doc) => {
   const v = doc.value;

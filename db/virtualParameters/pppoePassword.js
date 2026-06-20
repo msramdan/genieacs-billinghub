@@ -1,16 +1,17 @@
-// PPPoE Password — writable, reads all WAN slots
+// PPPoE Password — preserve ACS-set values (CPE often returns blank per TR-069)
 let pw = "";
 
 if (args[1].value) {
-  pw = args[1].value[0];
+  pw = args[1].value[0] != null ? String(args[1].value[0]) : "";
   declare("InternetGatewayDevice.WANDevice.*.WANConnectionDevice.*.WANPPPConnection.*.Password", null, {
     value: pw,
   });
 } else {
-  let keys = [
+  const keys = [
     "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.3.WANPPPConnection.1.Password",
     "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.2.WANPPPConnection.1.Password",
     "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.4.WANPPPConnection.1.Password",
+    "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.5.WANPPPConnection.1.Password",
     "InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Password",
     "InternetGatewayDevice.WANDevice.*.WANConnectionDevice.*.WANPPPConnection.*.Password",
   ];
@@ -20,17 +21,17 @@ if (args[1].value) {
 return { writable: true, value: [pw, "xsd:string"] };
 
 function getParameterValue(keys) {
-  for (let key of keys) {
+  for (const key of keys) {
     if (key.includes("WANPPPConnection.1.Password")) {
-      let connectionTypeKey = key.replace("Password", "ConnectionType");
-      let connectionType = declare(connectionTypeKey, { value: Date.now() });
+      const connectionTypeKey = key.replace("Password", "ConnectionType");
+      const connectionType = declare(connectionTypeKey, { value: 1 });
       if (connectionType.size && connectionType.value[0] === "PPPoE_Bridged") {
         continue;
       }
     }
-    let d = declare(key, { path: Date.now() - 120 * 1000, value: Date.now() });
-    for (let item of d) {
-      if (item.value && item.value[0]) return item.value[0];
+    const d = declare(key, { value: 1 });
+    for (const item of d) {
+      if (item.value && item.value[0]) return String(item.value[0]);
     }
   }
   return "";
