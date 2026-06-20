@@ -83,13 +83,29 @@ sudo systemctl restart genieacs-{cwmp,fs,ui,nbi}
 ```
 genieacs-billinghub/
 ├── install.sh                 # installer utama
-├── logo.png                   # logo header & login (satu-satunya file logo)
-├── genieacs/public/           # CSS, JS, theme-toggle, logo.png
-├── db/export/                 # snapshot config MongoDB
-├── db/virtualParameters/      # script VP
-├── db/provisions/             # provision inform
-└── scripts/                   # build UI, restore DB, patch
+├── logo.png                   # logo header & login
+├── genieacs/public/           # CSS, JS, theme-toggle
+├── db/export/                 # snapshot MongoDB (config, VP, provisions)
+├── db/virtualParameters/      # script VP multi-vendor
+├── db/provisions/             # inform, refresh-wlan
+├── lib/                       # logika generic (wifi connected)
+├── tests/                     # unit test (npm test)
+└── scripts/                   # hanya script produksi + 1 diag generic
 ```
+
+## Scripts (generic — tanpa ID perangkat)
+
+| Script | Fungsi |
+|--------|--------|
+| `import-db.mongosh.js` | Restore DB dari `db/export/` + auto `apply-patches` |
+| `apply-patches.mongosh.js` | Patch index, wifi connected, preset (semua vendor) |
+| `patch-inform.sh` | Set ACS URL / auth TR-069 |
+| `restore-db.sh` | Backup + import DB |
+| `diag-device.mongosh.js` | Cek 1 perangkat: `DEVICE_ID='...' mongosh genieacs --quiet scripts/diag-device.mongosh.js` |
+| `restore-gacs-detail.mongosh.js` | Maintenance: reset UI device tabs dari export |
+| `extract-gacs-detail.js` | Dev: regenerate export UI dari MongoDB |
+
+Pendekatan sama seperti repo **GACS-Ubuntu-22.04** / **genieacs**: parameter & UI multi-vendor lewat `db/export/config.json` + tab filter per manufacturer (ZTE, Huawei, CMCC, …), bukan script per modem/nama pelanggan.
 
 ## Konfigurasi ONU
 

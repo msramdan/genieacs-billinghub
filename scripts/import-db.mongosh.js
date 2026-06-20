@@ -49,6 +49,12 @@ const vpOverrides = {
   IPTR069: "virtualParameters/IPTR069.js",
   WlanPassword: "virtualParameters/WlanPassword.js",
   MacAddress: "virtualParameters/MacAddress.js",
+  pppoeUsername2: "virtualParameters/pppoeUsername2.js",
+  pppoeUsername: "virtualParameters/pppoeUsername.js",
+  pppoePassword: "virtualParameters/pppoePassword.js",
+  pppoeMac: "virtualParameters/pppoeMac.js",
+  getSSID: "virtualParameters/getSSID.js",
+  displayMac: "virtualParameters/displayMac.js",
 };
 
 for (const [id, file] of Object.entries(vpOverrides)) {
@@ -128,3 +134,6 @@ db.config.find({ value: /KeyPassphrase|PreSharedKey\.1\.PreSharedKey/ }).forEach
 if (autoWlan > 0) print("OK: auto WLAN password patches (" + autoWlan + ")");
 
 print("Import selesai.");
+
+print("Applying BillingHub patches...");
+load(path.join(root, "scripts", "apply-patches.mongosh.js"));
