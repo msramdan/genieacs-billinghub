@@ -53,6 +53,6 @@ if (vpPhase === 0) {
   declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", vpTick);
 }
 
-// Optical RX + temperature: every inform (CT-COM raw values need VP conversion)
-declare("VirtualParameters.RXPower", { value: 1 });
-declare("VirtualParameters.gettemp", { value: 1 });
+// Optical RX + temperature — refresh ~2 min (value:1 every inform + refresh-wlan = too_many_rpcs)
+declare("VirtualParameters.RXPower", vpTick);
+declare("VirtualParameters.gettemp", vpTick);

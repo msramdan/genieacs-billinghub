@@ -23,10 +23,19 @@ db.provisions.updateOne(
 print('OK inform updated');
 "
 
-echo "=== Apply RX/temp patches ==="
+echo "=== Apply index RX/temp (VP-only) ==="
 export BILLINGHUB_ROOT="$ROOT"
 mongosh genieacs --quiet "$ROOT/scripts/patch-index-full-fallbacks.mongosh.js"
-mongosh genieacs --quiet "$ROOT/scripts/patch-rx-temp-refresh.mongosh.js"
+
+if [[ "${SKIP_VP_CLEAR:-}" != "1" ]]; then
+  echo "=== Clear RX/temp VP cache ==="
+  mongosh genieacs --quiet "$ROOT/scripts/patch-rx-temp-refresh.mongosh.js"
+else
+  echo "=== Skip VP cache clear (SKIP_VP_CLEAR=1) ==="
+fi
+
+echo "=== Clear too_many_rpcs faults ==="
+mongosh genieacs --quiet --eval "print('faults cleared:', db.faults.deleteMany({ code: 'too_many_rpcs' }).deletedCount)"
 
 echo "=== Restart GenieACS ==="
 sudo systemctl restart genieacs-cwmp genieacs-ui
@@ -34,23 +43,28 @@ sleep 3
 
 echo "=== Connection request all devices ==="
 python3 << 'PY'
-import json, subprocess, urllib.parse, urllib.request
+import base64
+import json
+import subprocess
+import urllib.parse
+import urllib.request
 
 base = "http://127.0.0.1:7557"
-auth = "msn:msn"
-req = urllib.request.Request(base + "/devices/?projection=_id")
-with urllib.request.urlopen(req) as r:
+auth = base64.b64encode(b"msn:msn").decode()
+headers = {"Authorization": "Basic " + auth}
+req = urllib.request.Request(base + "/devices/?projection=_id", headers=headers)
+with urllib.request.urlopen(req, timeout=30) as r:
     devices = json.load(r)
 count = 0
 for d in devices:
     enc = urllib.parse.quote(d["_id"], safe="")
     cmd = [
-        "curl", "-sf", "--max-time", "8", "-u", auth, "-X", "POST",
+        "curl", "-sf", "--max-time", "8", "-u", "msn:msn", "-X", "POST",
         f"{base}/devices/{enc}/tasks?connection_request",
         "-H", "Content-Type: application/json", "-d", "{}",
     ]
     if subprocess.call(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0:
         count += 1
-print(f"OK connection_request sent to {count} devices")
+print(f"OK connection_request sent to {count}/{len(devices)} devices")
 PY
 systemctl is-active genieacs-cwmp genieacs-ui
