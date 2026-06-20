@@ -31,7 +31,6 @@
   {"_id": "ui.device.1.components.3.filter", "value": "false"},
   {"_id": "ui.device.14.components.1.filter", "value": "(InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PreSharedKey.1.KeyPassphrase IS NOT NULL)"},
   {"_id": "ui.device.14.components.2.filter", "value": "(InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.PreSharedKey.1.KeyPassphrase IS NULL)"},
-  {"_id": "ui.device.16.filter", "value": "false"},
   {"_id": "cwmp.gpvBatchSize", "value": "128"},
   {"_id": "cwmp.maxCommitIterations", "value": "256"}
 ]

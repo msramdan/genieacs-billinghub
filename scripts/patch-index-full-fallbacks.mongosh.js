@@ -165,7 +165,7 @@ const patches = [
   { _id: "ui.device.1.components.0.parameters.16.parameter", value: PPP_IP },
   { _id: "ui.device.1.components.0.parameters.17.parameter", value: TR069_IP },
   { _id: "ui.device.1.components.0.parameters.23.parameter", value: SSID },
-  { _id: "ui.device.1.components.0.parameters.22.parameter", value: "VirtualParameters.activedevices" },
+  { _id: "ui.device.1.components.0.parameters.22.parameter", value: ACTIVE },
   { _id: "ui.device.1.components.0.parameters.7.parameter", value: MAC },
 ];
 
@@ -186,8 +186,8 @@ if (fs.existsSync(vpJson)) {
   print("WARN VP JSON not found:", vpJson);
 }
 
-// Local VP overrides (BillingHub improvements) — skip getSSID (reverted; use beryindo export)
-const vpSkip = new Set(["getSSID"]);
+// Local VP overrides — live SSID/Active (match SSID-LIST, no stale beryindo cache)
+const vpSkip = new Set([]);
 const vpDir = process.env.VP_DIR || "/tmp/vp";
 if (fs.existsSync(vpDir)) {
   for (const file of fs.readdirSync(vpDir).filter((f) => f.endsWith(".js"))) {
@@ -215,6 +215,12 @@ db.config.updateOne({ _id: "cwmp.gpvBatchSize" }, { $set: { value: "128" } }, { 
 
 db.faults.deleteMany({});
 db.cache.deleteMany({});
+
+const staleVp = db.devices.updateMany(
+  {},
+  { $unset: { "VirtualParameters.getSSID": "", "VirtualParameters.activedevices": "" } }
+);
+print("Cleared stale getSSID/activedevices cache on", staleVp.modifiedCount, "devices");
 
 print("\n=== Device column audit ===");
 db.devices.find({}).forEach((d) => {

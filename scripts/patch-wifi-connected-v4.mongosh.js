@@ -109,7 +109,7 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
     upsert(`${prefix}.components.2.components.0.type`, "'parameter-list'");
     upsert(
       `${prefix}.components.2.components.0.parameters.0.label`,
-      "'Connected = counter WiFi ONT. Detail client tidak dikirim via AssociatedDevice — lihat Semua Perangkat DHCP di bawah, atau klik Summon.'"
+      "'Connected = counter WiFi ONT. Detail client tidak dikirim via AssociatedDevice — klik Summon untuk refresh.'"
     );
     upsert(`${prefix}.components.2.components.0.parameters.0.element`, "'span.inform'");
 
@@ -125,10 +125,11 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
   }
 }
 
-// LAN HOST — full DHCP table (may include stale/guest); not the same as Connected count
-upsert("ui.device.15.parameters.0.label", "'Semua Perangkat DHCP (histori — bisa lebih banyak dari Connected)'");
-upsert("ui.device.16.childParameters.0.parameter", "COALESCE(HostName, Layer2Interface, VendorClassID, Active)");
-db.config.deleteOne({ _id: "ui.device.16.filter" });
+// LAN HOST — remove entirely (filter only works on container, not parameter-list/table)
+const dhcpRemoved =
+  db.config.deleteMany({ _id: /^ui\.device\.15(\.|$)/ }).deletedCount +
+  db.config.deleteMany({ _id: /^ui\.device\.16(\.|$)/ }).deletedCount;
+print("Removed LAN HOST UI keys:", dhcpRemoved);
 
 const rw = process.env.REFRESH_WLAN || path.join(root, "db", "provisions", "refresh-wlan.js");
 if (fs.existsSync(rw)) {

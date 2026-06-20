@@ -54,6 +54,7 @@ const vpOverrides = {
   pppoePassword: "virtualParameters/pppoePassword.js",
   pppoeMac: "virtualParameters/pppoeMac.js",
   getSSID: "virtualParameters/getSSID.js",
+  activedevices: "virtualParameters/activedevices.js",
   displayMac: "virtualParameters/displayMac.js",
 };
 
