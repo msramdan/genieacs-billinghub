@@ -78,32 +78,10 @@ const ACTIVE = coalesce(
   WLAN(2, "WLAN_AssociatedDeviceNumberOfEntries")
 );
 
-const RX = coalesce(
-  "VirtualParameters.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_CT-COM_EponInterfaceConfig.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_CT-COM_GponInterfaceConfig.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_ZTE-COM_WANPONInterfaceConfig.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_CMCC_EponInterfaceConfig.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_CMCC_GponInterfaceConfig.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_FH_GponInterfaceConfig.RXPower",
-  "InternetGatewayDevice.WANDevice.1.X_GponInterafceConfig.RXPower",
-  "InternetGatewayDevice.X_ALU_OntOpticalParam.RXPower"
-);
-
-const TEMP = coalesce(
-  "VirtualParameters.gettemp",
-  "InternetGatewayDevice.DeviceInfo.Temperature",
-  "InternetGatewayDevice.DeviceInfo.X_CT-COM_Temperature",
-  "InternetGatewayDevice.WANDevice.1.X_CT-COM_EponInterfaceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_CT-COM_GponInterfaceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_ZTE-COM_WANPONInterfaceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_CMCC_EponInterfaceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_CMCC_GponInterfaceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_GponInterafceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_FH_GponInterfaceConfig.TransceiverTemperature",
-  "InternetGatewayDevice.WANDevice.1.X_CU_WANEPONInterfaceConfig.OpticalTransceiver.Temperature",
-  "InternetGatewayDevice.WANDevice.1.X_CU_WANGPONInterfaceConfig.OpticalTransceiver.Temperature"
-);
+// RX/Temp must use VP only — raw TR-069 values (e.g. 448, 13945 on CT-COM XPW300)
+// break overview-dot charts when used as COALESCE fallback.
+const RX = "VirtualParameters.RXPower";
+const TEMP = "VirtualParameters.gettemp";
 
 const UPTIME = coalesce(
   "VirtualParameters.getdeviceuptime",
@@ -239,10 +217,7 @@ db.devices.find({}).forEach((d) => {
     "-";
   const ipVal = vp.pppoeIP?._value || getPpp("4", "ExternalIPAddress") || getPpp("3", "ExternalIPAddress") || "-";
   const ssidVal = vp.getSSID?._value || wlan1?.SSID?._value || "-";
-  const rxVal =
-    vp.RXPower?._value ||
-    igd.WANDevice?.["1"]?.["X_CT-COM_EponInterfaceConfig"]?.RXPower?._value ||
-    "-";
+  const rxVal = vp.RXPower?._value || "-";
 
   print(
     id.substring(0, 38).padEnd(38),

@@ -33,13 +33,11 @@ const vpTick = { value: Date.now(120000) };
 if (vpPhase === 0) {
   declare("VirtualParameters.pppoeUsername2", vpTick);
   declare("VirtualParameters.pppoeIP", vpTick);
-  declare("VirtualParameters.RXPower", vpTick);
 } else if (vpPhase === 1) {
   declare("VirtualParameters.getSSID", vpTick);
   declare("VirtualParameters.activedevices", vpTick);
   declare("VirtualParameters.getdeviceuptime", vpTick);
 } else if (vpPhase === 2) {
-  declare("VirtualParameters.gettemp", vpTick);
   declare("VirtualParameters.displayMac", vpTick);
   declare("VirtualParameters.getponmode", vpTick);
 } else if (vpPhase === 3) {
@@ -54,3 +52,7 @@ if (vpPhase === 0) {
   declare("VirtualParameters.pppoePassword", { path: vpTick, value: 1 });
   declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", vpTick);
 }
+
+// Optical RX + temperature: every inform (CT-COM raw values need VP conversion)
+declare("VirtualParameters.RXPower", { value: 1 });
+declare("VirtualParameters.gettemp", { value: 1 });
