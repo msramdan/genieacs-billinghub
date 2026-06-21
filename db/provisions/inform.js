@@ -36,10 +36,10 @@ if (vpPhase === 0) {
 } else if (vpPhase === 1) {
   declare("VirtualParameters.getSSID", vpTick);
   declare("VirtualParameters.activedevices", vpTick);
-  declare("VirtualParameters.getdeviceuptime", vpTick);
 } else if (vpPhase === 2) {
   declare("VirtualParameters.displayMac", vpTick);
   declare("VirtualParameters.getponmode", vpTick);
+  declare("VirtualParameters.getdeviceuptime", vpTick);
 } else if (vpPhase === 3) {
   declare("VirtualParameters.getSerialNumber", vpTick);
   declare("VirtualParameters.pppoeUsername", vpTick);
@@ -48,11 +48,9 @@ if (vpPhase === 0) {
   declare("VirtualParameters.getpppuptime", vpTick);
   declare("VirtualParameters.IPTR069", vpTick);
   declare("VirtualParameters.PonMac", vpTick);
-} else {
+  declare("VirtualParameters.RXPower", vpTick);
+} else if (vpPhase === 5) {
   declare("VirtualParameters.pppoePassword", { path: vpTick, value: 1 });
   declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.SSID", vpTick);
+  declare("VirtualParameters.gettemp", vpTick);
 }
-
-// Optical RX + temperature — refresh ~2 min (value:1 every inform + refresh-wlan = too_many_rpcs)
-declare("VirtualParameters.RXPower", vpTick);
-declare("VirtualParameters.gettemp", vpTick);

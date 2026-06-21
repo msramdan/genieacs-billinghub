@@ -1,0 +1,83 @@
+================================================================================
+  BILLINGHUB ACS — DAFTAR SERVER & AKSES
+  Update: 2026-06-21
+  Semua server: UI + TR-069 + NBI pakai admin / bilhub90
+================================================================================
+
+--------------------------------------------------------------------------------
+  KAPITA
+--------------------------------------------------------------------------------
+  Domain   : acs-kapita.billinghub.id
+  IP       : 43.129.35.21
+  SSH      : ubuntu
+
+  UI       : http://acs-kapita.billinghub.id:3000
+  CWMP     : http://acs-kapita.billinghub.id:7547
+  NBI      : http://acs-kapita.billinghub.id:7557
+
+  Akun     : admin / bilhub90  (UI, CWMP/TR-069, NBI)
+
+--------------------------------------------------------------------------------
+  NAAM
+--------------------------------------------------------------------------------
+  Domain   : acs.naam.co.id
+  IP       : 43.157.224.18
+  SSH      : ubuntu
+
+  UI       : http://acs.naam.co.id:3000
+  CWMP     : http://acs.naam.co.id:7547
+  NBI      : http://acs.naam.co.id:7557
+
+  Akun     : admin / bilhub90  (UI, CWMP/TR-069, NBI)
+
+--------------------------------------------------------------------------------
+  ANNET
+--------------------------------------------------------------------------------
+  Domain   : acs-annet.billinghub.id
+  IP       : 103.93.133.80
+  SSH      : serveracs  (key: serrveracs.ppk)
+
+  UI       : http://acs-annet.billinghub.id:3000
+  CWMP     : http://acs-annet.billinghub.id:7547
+  NBI      : http://acs-annet.billinghub.id:7557
+
+  Akun     : admin / bilhub90  (UI, CWMP/TR-069, NBI)
+
+--------------------------------------------------------------------------------
+  LEX
+--------------------------------------------------------------------------------
+  Domain   : acs-lex.billinghub.id
+  IP       : 103.178.175.103
+  SSH      : root
+
+  UI       : http://acs-lex.billinghub.id:3000
+  CWMP     : http://acs-lex.billinghub.id:7547
+  NBI      : http://acs-lex.billinghub.id:7557
+
+  Akun     : admin / bilhub90  (UI, CWMP/TR-069, NBI)
+
+================================================================================
+  SETTING MODEM / ONT (semua server)
+================================================================================
+  ACS URL  : http://<domain-server>:7547
+  Username : admin
+  Password : bilhub90
+
+================================================================================
+  PORT YANG HARUS TERBUKA
+================================================================================
+  7547  — CWMP (TR-069, modem connect)
+  3000  — UI Dashboard
+  7557  — NBI API
+  7567  — File Server (FS, internal)
+
+================================================================================
+  RE-SYNC CONFIG (di server, hanya domain beda)
+================================================================================
+  sudo BH_ACS_HOST=<domain> BH_ACS_USER=admin BH_ACS_PASS=bilhub90 \
+       BH_UI_PASS=bilhub90 bash scripts/sync-config.sh
+
+  Ganti password saja:
+  sudo BH_ACS_HOST=<domain> bash scripts/set-all-passwords.sh
+
+================================================================================

@@ -28,21 +28,21 @@ load(path.join(scriptsDir, "patch-wifi-connected-v4.mongosh.js"));
 load(path.join(scriptsDir, "patch-provision-password-cache.mongosh.js"));
 load(path.join(scriptsDir, "patch-preset-default-boot.mongosh.js"));
 
-// refresh-wlan preset on inform channel
+// refresh-wlan on BOOT only — not every inform (too_many_rpcs with inform + heavy VP scripts)
 db.presets.updateOne(
   { _id: "refresh-wlan" },
   {
     $set: {
       weight: 1,
-      channel: "inform",
+      channel: "default",
       precondition: "",
-      events: {},
+      events: { "0 BOOTSTRAP": true, "1 BOOT": true },
       configurations: [{ type: "provision", name: "refresh-wlan", args: null }],
     },
   },
   { upsert: true }
 );
-print("OK preset refresh-wlan -> inform");
+print("OK preset refresh-wlan -> BOOT only");
 
 db.cache.deleteMany({});
 print("=== apply-patches done ===");

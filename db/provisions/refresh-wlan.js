@@ -1,8 +1,7 @@
-// refresh-wlan — fetch AssociatedDevice slots explicitly (GenieACS forum #3135, #5074)
-// ONT often omits AssociatedDevice from GetParameterNames; declare forces GetParameterValues
-const update = Date.now(60000);
-const minutes = Date.now(60000);
-const phase = Math.floor(Date.now() / 120000) % 5;
+// refresh-wlan — light phased refresh (stay under ~64 RPCs per inform session)
+const update = Date.now(120000);
+const slow = Date.now(300000);
+const phase = Math.floor(Date.now() / 120000) % 6;
 
 function totalAssoc(wlan) {
   const d = declare(
@@ -13,15 +12,12 @@ function totalAssoc(wlan) {
 }
 
 function refreshAdSlots(wlan, maxSlot) {
-  const n = Math.min(Math.max(maxSlot, totalAssoc(wlan), 1), 32);
+  const n = Math.min(Math.max(maxSlot, totalAssoc(wlan), 1), 8);
   for (let i = 1; i <= n; i++) {
     const base =
       "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + wlan + ".AssociatedDevice." + i;
     declare(base + ".AssociatedDeviceIPAddress", { path: update, value: update });
     declare(base + ".AssociatedDeviceMACAddress", { path: update, value: update });
-    declare(base + ".X_ZTE-COM_AssociatedDeviceName", { path: minutes, value: minutes });
-    declare(base + ".X_HW_AssociatedDevicedescriptions", { path: minutes, value: minutes });
-    declare(base + ".X_CT-COM_AssociatedDeviceName", { path: minutes, value: minutes });
   }
 }
 
@@ -31,27 +27,11 @@ declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDeviceN
 declare("InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries", { value: 1 });
 
 if (phase === 0) {
-  for (let wlan = 1; wlan <= 4; wlan++) {
-    declare(
-      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." +
-        wlan +
-        ".AssociatedDevice.*.AssociatedDeviceIPAddress",
-      { path: update, value: update }
-    );
-    declare(
-      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." +
-        wlan +
-        ".AssociatedDevice.*.AssociatedDeviceMACAddress",
-      { path: update, value: update }
-    );
-    refreshAdSlots(wlan, 16);
-  }
+  refreshAdSlots(1, 8);
 } else if (phase === 1) {
-  for (let wlan = 1; wlan <= 8; wlan++) {
-    refreshAdSlots(wlan, 32);
-  }
+  refreshAdSlots(2, 8);
 } else if (phase === 2) {
-  for (let i = 1; i <= 32; i++) {
+  for (let i = 1; i <= 16; i++) {
     declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".IPAddress", {
       path: update,
       value: update,
@@ -60,22 +40,21 @@ if (phase === 0) {
       path: update,
       value: update,
     });
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".HostName", {
-      path: minutes,
-      value: minutes,
-    });
   }
 } else if (phase === 3) {
-  for (let i = 1; i <= 32; i++) {
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".InterfaceType", {
-      path: minutes,
-      value: minutes,
+  for (let i = 1; i <= 16; i++) {
+    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".HostName", {
+      path: slow,
+      value: slow,
     });
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".Active", {
-      path: minutes,
-      value: minutes,
+    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".InterfaceType", {
+      path: slow,
+      value: slow,
     });
   }
+} else if (phase === 4) {
+  refreshAdSlots(3, 8);
+  refreshAdSlots(4, 8);
 } else {
   declare(
     "InternetGatewayDevice.LANDevice.*.WLANConfiguration.*.TotalAssociations",
