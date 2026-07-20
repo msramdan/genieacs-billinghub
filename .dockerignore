@@ -1,0 +1,7 @@
+node_modules
+theme-studio/node_modules
+theme-studio/dist
+.git
+**/*.ppk
+**/.env
+**/acs-credentials.env

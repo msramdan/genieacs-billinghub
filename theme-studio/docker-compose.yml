@@ -1,0 +1,24 @@
+# Jalankan dari root repo:
+#   docker compose -f theme-studio/docker-compose.yml up -d --build
+#
+# UI: http://SERVER_IP:5173
+# Container name: ACS-Studio
+#
+# Auth (opsional): set AUTH_USER / AUTH_PASS di environment host atau file .env
+#   AUTH_USER=admin AUTH_PASS=rahasia docker compose -f theme-studio/docker-compose.yml up -d
+#
+# network_mode: host — pakai port host langsung (default app PORT=5173)
+
+services:
+  acs-studio:
+    container_name: ACS-Studio
+    build:
+      context: ..
+      dockerfile: theme-studio/Dockerfile
+    network_mode: host
+    environment:
+      - PORT=${PORT:-5173}
+      - NODE_ENV=production
+      - AUTH_USER=${AUTH_USER:-}
+      - AUTH_PASS=${AUTH_PASS:-}
+    restart: unless-stopped

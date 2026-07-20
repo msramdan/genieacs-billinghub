@@ -38,33 +38,52 @@ fi
 
 banner
 
-# --- Konfigurasi interaktif ---
-LOCAL_IP=$(hostname -I | awk '{print $1}')
-
+echo -e "${YELLOW}Catatan instalasi:${NC}"
+echo "  • Cocok untuk VPS / server / STB yang masih fresh (kosong)."
+echo "  • Ideal 1 mesin = 1 peran ACS (port 3000, 7547, 7557, 7567)."
+echo "  • Kalau ACS sudah jalan & ada data device: jangan full install ulang."
+echo "    Pakai sync-config agar data modem aman."
 echo ""
-ask "Domain/IP ACS CWMP [$LOCAL_IP]: "
-read -r ACS_HOST
-ACS_HOST="${ACS_HOST:-$LOCAL_IP}"
 
-ask "Port CWMP [7547]: "
-read -r ACS_PORT
-ACS_PORT="${ACS_PORT:-7547}"
+# --- Konfigurasi ---
+# Non-interactive (ACS Studio): set BH_NONINTERACTIVE=1 + env vars
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+NONINTERACTIVE="${BH_NONINTERACTIVE:-0}"
 
-ask "Username ACS TR-069 [msn]: "
-read -r ACS_USER
-ACS_USER="${ACS_USER:-msn}"
+if [[ "$NONINTERACTIVE" == "1" || "$NONINTERACTIVE" == "true" ]]; then
+  ACS_HOST="${ACS_HOST:-${BH_ACS_HOST:-$LOCAL_IP}}"
+  ACS_PORT="${ACS_PORT:-${BH_ACS_PORT:-7547}}"
+  ACS_USER="${ACS_USER:-${BH_ACS_USER:-msn}}"
+  ACS_PASS="${ACS_PASS:-${BH_ACS_PASS:-msn}}"
+  UI_ADMIN_PASS="${UI_ADMIN_PASS:-${BH_UI_PASS:-bilhub90}}"
+  INSTALL_ZT="${INSTALL_ZT:-n}"
+  log "Mode non-interactive (ACS Studio)"
+else
+  echo ""
+  ask "Domain/IP ACS CWMP [$LOCAL_IP]: "
+  read -r ACS_HOST
+  ACS_HOST="${ACS_HOST:-$LOCAL_IP}"
 
-ask "Password ACS TR-069 [msn]: "
-read -r ACS_PASS
-ACS_PASS="${ACS_PASS:-msn}"
+  ask "Port CWMP [7547]: "
+  read -r ACS_PORT
+  ACS_PORT="${ACS_PORT:-7547}"
 
-ask "Password admin UI GenieACS [bilhub90]: "
-read -r UI_ADMIN_PASS
-UI_ADMIN_PASS="${UI_ADMIN_PASS:-bilhub90}"
+  ask "Username ACS TR-069 [msn]: "
+  read -r ACS_USER
+  ACS_USER="${ACS_USER:-msn}"
 
-ask "Install ZeroTier untuk NAT traversal? (y/n) [n]: "
-read -r INSTALL_ZT
-INSTALL_ZT="${INSTALL_ZT:-n}"
+  ask "Password ACS TR-069 [msn]: "
+  read -r ACS_PASS
+  ACS_PASS="${ACS_PASS:-msn}"
+
+  ask "Password admin UI GenieACS [bilhub90]: "
+  read -r UI_ADMIN_PASS
+  UI_ADMIN_PASS="${UI_ADMIN_PASS:-bilhub90}"
+
+  ask "Install ZeroTier untuk NAT traversal? (y/n) [n]: "
+  read -r INSTALL_ZT
+  INSTALL_ZT="${INSTALL_ZT:-n}"
+fi
 
 ACS_URL="http://${ACS_HOST}:${ACS_PORT}"
 
@@ -75,16 +94,49 @@ echo "  ACS Auth    : $ACS_USER / ****"
 echo "  UI Admin    : admin / ****"
 echo "  ZeroTier    : $INSTALL_ZT"
 echo ""
-ask "Lanjutkan instalasi? (y/n): "
-read -r CONFIRM
-[[ "$CONFIRM" == "y" ]] || err "Instalasi dibatalkan."
+
+if [[ "$NONINTERACTIVE" != "1" && "$NONINTERACTIVE" != "true" ]]; then
+  ask "Lanjutkan instalasi? (y/n): "
+  read -r CONFIRM
+  [[ "$CONFIRM" == "y" ]] || err "Instalasi dibatalkan."
+else
+  log "Lanjut install otomatis…"
+fi
+
+# Tunggu / lepaskan apt lock (sering dipegang unattended-upgrades di VPS baru)
+wait_for_apt() {
+  local max="${1:-180}"
+  local i=0
+  log "Menyiapkan apt (cek unattended-upgrades / dpkg lock)…"
+  systemctl stop unattended-upgrades 2>/dev/null || true
+  systemctl stop apt-daily.service apt-daily-upgrade.service 2>/dev/null || true
+  systemctl kill --kill-who=all unattended-upgrades 2>/dev/null || true
+  while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+     || fuser /var/lib/apt/lists/lock >/dev/null 2>&1 \
+     || fuser /var/lib/dpkg/lock >/dev/null 2>&1; do
+    if (( i >= max )); then
+      warn "Apt masih terkunci — mencoba lanjut…"
+      break
+    fi
+    if (( i % 15 == 0 )); then
+      log "Menunggu apt lock… (${i}s/${max}s)"
+    fi
+    sleep 1
+    ((i++)) || true
+  done
+  dpkg --configure -a 2>/dev/null || true
+}
+
+wait_for_apt 180
 
 # ============================================================
 # 1. Node.js
 # ============================================================
 if ! command -v node >/dev/null 2>&1; then
   log "Install Node.js 20..."
+  wait_for_apt 120
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  wait_for_apt 60
   apt-get install -y nodejs
 else
   log "Node.js sudah ada: $(node -v)"
@@ -95,14 +147,36 @@ fi
 # ============================================================
 if ! systemctl is-active --quiet mongod 2>/dev/null; then
   log "Install MongoDB..."
+  wait_for_apt 60
   ubuntu_codename=""
   if [[ -r /etc/os-release ]]; then
     ubuntu_codename="$(. /etc/os-release && echo "${VERSION_CODENAME:-${UBUNTU_CODENAME:-}}")"
   fi
   [[ -z "$ubuntu_codename" ]] && command -v lsb_release >/dev/null && ubuntu_codename="$(lsb_release -sc)"
 
-  mongodb_major="4.4"
-  [[ "$ubuntu_codename" == "jammy" || "$ubuntu_codename" == "noble" ]] && mongodb_major="8.0"
+  # MongoDB apt hanya punya beberapa distro. Map Ubuntu baru/unknown → noble.
+  mongo_distro=""
+  mongodb_major="8.0"
+  case "$ubuntu_codename" in
+    focal)
+      mongodb_major="4.4"
+      mongo_distro="focal"
+      ;;
+    jammy)
+      mongodb_major="8.0"
+      mongo_distro="jammy"
+      ;;
+    noble)
+      mongodb_major="8.0"
+      mongo_distro="noble"
+      ;;
+    *)
+      # oracular / plucky / resolute / dll — pakai paket noble
+      mongodb_major="8.0"
+      mongo_distro="noble"
+      warn "Ubuntu '$ubuntu_codename' belum ada di repo MongoDB resmi — memakai paket noble."
+      ;;
+  esac
 
   apt-get update -y
   apt-get install -y gnupg curl
@@ -110,13 +184,16 @@ if ! systemctl is-active --quiet mongod 2>/dev/null; then
   curl -fsSL "https://www.mongodb.org/static/pgp/server-${mongodb_major}.asc" \
     | gpg --dearmor -o "/usr/share/keyrings/mongodb-server-${mongodb_major}.gpg"
   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-${mongodb_major}.gpg ] \
-https://repo.mongodb.org/apt/ubuntu ${ubuntu_codename:-focal}/mongodb-org/${mongodb_major} multiverse" \
+https://repo.mongodb.org/apt/ubuntu ${mongo_distro}/mongodb-org/${mongodb_major} multiverse" \
     > "/etc/apt/sources.list.d/mongodb-org-${mongodb_major}.list"
+  # Hapus list MongoDB lama yang salah (mis. resolute/4.4)
+  rm -f /etc/apt/sources.list.d/mongodb-org-4.4.list 2>/dev/null || true
+  wait_for_apt 60
   apt-get update -y
   apt-get install -y mongodb-org
   systemctl enable --now mongod
   sleep 3
-  log "MongoDB $mongodb_major siap."
+  log "MongoDB $mongodb_major siap (repo: $mongo_distro)."
 else
   log "MongoDB sudah berjalan."
 fi

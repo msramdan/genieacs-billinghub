@@ -16,10 +16,13 @@ GenieACS custom **BillingHub.id** — tema UI charcoal, logo BillingHub, overvie
 | Item | Detail |
 |------|--------|
 | OS | Ubuntu 20.04 / 22.04 / 24.04 (amd64) |
+| Target | VPS / server / STB **fresh** (kosong) — ideal 1 mesin = 1 ACS |
 | Akses | root / sudo |
 | Port ACS | 7547 (CWMP), 7557 (NBI), 7567 (FS), 3000 (UI) |
 | Port L2TP Summon | UDP **500**, **4500**, **1701** (buka di firewall VPS/cloud) |
 | RAM | min. 2 GB |
+
+> **Sudah ada ACS + data device?** Jangan full `install.sh` ulang. Pakai `scripts/sync-config.sh` atau ACS Studio (logo/warna) supaya data modem tidak ikut berisiko.
 
 ## Carta setup (alur instalasi)
 
@@ -41,6 +44,17 @@ flowchart TD
     N --> O[Ping IP modem dari VPS]
     O --> P[Summon OK]
 ```
+
+## ACS Studio (lokal)
+
+UI lokal untuk ganti logo + warna ACS di VPS via SSH:
+
+```bash
+cd theme-studio && npm install && npm run dev
+```
+
+Buka http://127.0.0.1:5173 — lihat `theme-studio/README.md`.  
+Rollback: `git checkout pre-theme-studio`
 
 ## Instalasi cepat
 
