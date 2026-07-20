@@ -1,6 +1,7 @@
 # Credential & akses server — jangan commit
 servers-access.txt
 servers.billinghub.env
+servers.local.env
 **/acs-credentials.env
 **/*credentials*.env
 **/*.ppk
@@ -9,7 +10,6 @@ servers.billinghub.env
 .env
 .env.*
 !.env.example
-!servers.example.env
 
 backup/
 *.patched.js

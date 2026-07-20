@@ -1,7 +1,8 @@
 const crypto = require("crypto");
 
-const AUTH_USER = process.env.AUTH_USER || "";
-const AUTH_PASS = process.env.AUTH_PASS || "";
+// Default sama untuk lokal & Docker (bisa di-override lewat env)
+const AUTH_USER = process.env.AUTH_USER || "admin";
+const AUTH_PASS = process.env.AUTH_PASS || "billinghub01";
 const COOKIE = "acs_studio_session";
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 

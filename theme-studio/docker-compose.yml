@@ -1,13 +1,9 @@
 # Jalankan dari root repo:
+#   cp theme-studio/.env.example theme-studio/.env   # sekali
 #   docker compose -f theme-studio/docker-compose.yml up -d --build
 #
-# UI: http://SERVER_IP:5173
-# Container name: ACS-Studio
-#
-# Auth (opsional): set AUTH_USER / AUTH_PASS di environment host atau file .env
-#   AUTH_USER=admin AUTH_PASS=rahasia docker compose -f theme-studio/docker-compose.yml up -d
-#
-# network_mode: host — pakai port host langsung (default app PORT=5173)
+# Semua setting UI ACS Studio ada di theme-studio/.env
+# (lihat .env.example)
 
 services:
   acs-studio:
@@ -16,9 +12,13 @@ services:
       context: ..
       dockerfile: theme-studio/Dockerfile
     network_mode: host
+    env_file:
+      - .env.example
+      - path: .env
+        required: false
     environment:
       - PORT=${PORT:-5173}
-      - NODE_ENV=production
-      - AUTH_USER=${AUTH_USER:-}
-      - AUTH_PASS=${AUTH_PASS:-}
+      - NODE_ENV=${NODE_ENV:-production}
+      - AUTH_USER=${AUTH_USER:-admin}
+      - AUTH_PASS=${AUTH_PASS:-billinghub01}
     restart: unless-stopped
