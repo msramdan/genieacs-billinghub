@@ -67,13 +67,13 @@ sudo bash install.sh
 
 Installer akan menanyakan:
 
-1. Domain/IP ACS (contoh: `acs.billinghub.id` atau IP VPS)
+1. Domain/IP ACS (contoh: `acs.example.com` atau IP VPS)
 2. Port CWMP (default `7547`)
-3. Username & password TR-069
-4. Password admin UI
+3. Username & password TR-069 (kosong = generate acak)
+4. Password admin UI (kosong = samakan dengan TR-069)
 5. Konfirmasi install — setelah selesai, setup Summon pakai **L2TP** (lihat bagian di bawah)
 
-**Penting — kredensial:** jangan pakai default lemah (`msn`/`msn` atau `admin`/`bilhub90`).  
+**Penting — kredensial:** jangan pakai password lemah / yang sama di semua pelanggan.  
 Setelah install, **generate random** (UI = CWMP = NBI **sama**):
 
 ```bash
@@ -138,7 +138,7 @@ Modem (10.10.10.x) ←→ MikroTik  ──L2TP client keluar──→  VPS ACS (
 
 ### Prasyarat
 
-1. VPS ACS sudah install GenieACS BillingHub, punya **IP publik** (contoh `157.10.160.9`)
+1. VPS ACS sudah install GenieACS BillingHub, punya **IP publik** (contoh `203.0.113.10`)
 2. Firewall cloud VPS buka UDP **500, 4500, 1701**
 3. Akses MikroTik (Winbox / API)
 4. Tahu **subnet IP modem** (dari ConnectionRequestURL di GenieACS, atau pool PPPoE MikroTik)
@@ -190,7 +190,7 @@ export MT_HOST=vpn.contoh.id   # atau IP API
 export MT_PORT=10002
 export MT_USER=admin
 export MT_PASS='...'
-export ACS_IP=157.10.160.9
+export ACS_IP=203.0.113.10
 export L2TP_USER=acs-mt
 export L2TP_PASS='...'         # sama BH_L2TP_PASS
 export L2TP_PSK='...'          # sama BH_L2TP_PSK
@@ -289,7 +289,7 @@ Password  : <BH_ACS_PASS>     # random 20 karakter
 Inform    : ~200 detik (via provision)
 ```
 
-**Jangan** pakai `msn`/`msn` atau `admin`/`bilhub90` di server baru.
+**Jangan** pakai password lemah atau kredensial yang sama di semua server pelanggan.
 
 ---
 

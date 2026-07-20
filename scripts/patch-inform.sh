@@ -7,8 +7,8 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 ACS_HOST="${1:-$(hostname -I | awk '{print $1}')}"
 ACS_PORT="${2:-7547}"
-ACS_USER="${3:-msn}"
-ACS_PASS="${4:-msn}"
+ACS_USER="${3:?Usage: $0 <host> [port] <user> <pass>}"
+ACS_PASS="${4:?Usage: $0 <host> [port] <user> <pass>}"
 
 # Support full URL or host
 if [[ "$ACS_HOST" == http* ]]; then

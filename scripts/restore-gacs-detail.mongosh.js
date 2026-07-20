@@ -4,10 +4,12 @@
 
 const fs = require("fs");
 
-const ACS_URL = process.env.ACS_URL || "http://acs-annet.billinghub.id:7547";
-const ACS_USER = process.env.ACS_USER || "msn";
-const ACS_PASS = process.env.ACS_PASS || "msn";
-
+const ACS_URL = process.env.ACS_URL || "http://127.0.0.1:7547";
+const ACS_USER = process.env.ACS_USER || "";
+const ACS_PASS = process.env.ACS_PASS || "";
+if (!ACS_USER || !ACS_PASS) {
+  throw new Error("Set ACS_URL, ACS_USER, ACS_PASS env before running");
+}
 function upsert(id, value) {
   db.config.updateOne({ _id: id }, { $set: { value } }, { upsert: true });
 }

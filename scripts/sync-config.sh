@@ -4,14 +4,12 @@
 # Satu-satunya perbedaan antar server: BH_ACS_HOST (domain ACS)
 #
 # Usage:
-#   sudo BH_ACS_HOST=acs-kapita.billinghub.id bash scripts/sync-config.sh
+#   sudo BH_ACS_HOST=acs.example.com \
+#        BH_ACS_USER=admin BH_ACS_PASS='...' BH_UI_PASS='...' \
+#        bash scripts/sync-config.sh
 #
-# Env:
-#   BH_ACS_HOST   — domain ACS CWMP (wajib)
-#   BH_ACS_PORT   — default 7547
-#   BH_ACS_USER   — default msn
-#   BH_ACS_PASS   — default msn
-#   BH_UI_PASS    — default bilhub90
+# Env wajib: BH_ACS_HOST, BH_ACS_USER, BH_ACS_PASS, BH_UI_PASS
+# Env opsional: BH_ACS_PORT (default 7547)
 # ============================================================
 set -euo pipefail
 
@@ -20,13 +18,13 @@ export BILLINGHUB_ROOT="$ROOT"
 
 BH_ACS_HOST="${BH_ACS_HOST:-}"
 BH_ACS_PORT="${BH_ACS_PORT:-7547}"
-BH_ACS_USER="${BH_ACS_USER:-msn}"
-BH_ACS_PASS="${BH_ACS_PASS:-msn}"
-BH_UI_PASS="${BH_UI_PASS:-bilhub90}"
+BH_ACS_USER="${BH_ACS_USER:?Set BH_ACS_USER}"
+BH_ACS_PASS="${BH_ACS_PASS:?Set BH_ACS_PASS}"
+BH_UI_PASS="${BH_UI_PASS:?Set BH_UI_PASS}"
 
 if [[ -z "$BH_ACS_HOST" ]]; then
-  echo "Set BH_ACS_HOST (domain ACS server ini), contoh:" >&2
-  echo "  sudo BH_ACS_HOST=acs-kapita.billinghub.id bash scripts/sync-config.sh" >&2
+  echo "Set BH_ACS_HOST (domain/IP ACS server ini), contoh:" >&2
+  echo "  sudo BH_ACS_HOST=acs.example.com BH_ACS_USER=... BH_ACS_PASS=... BH_UI_PASS=... bash scripts/sync-config.sh" >&2
   exit 1
 fi
 

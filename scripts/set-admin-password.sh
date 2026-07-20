@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Set GenieACS admin password
+# Usage: bash scripts/set-admin-password.sh '<password>'
 set -euo pipefail
-PASS="${1:-bilhub90}"
+PASS="${1:?Usage: $0 <password>}"
 
 HASH_JSON=$(node -e "
 const c=require('crypto');

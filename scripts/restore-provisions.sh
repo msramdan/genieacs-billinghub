@@ -10,8 +10,8 @@ NC='\033[0m'
 
 ACS_HOST="${1:-$(hostname -I | awk '{print $1}')}"
 ACS_PORT="${2:-7547}"
-ACS_USER="${3:-msn}"
-ACS_PASS="${4:-msn}"
+ACS_USER="${3:?Usage: $0 <host> [port] <user> <pass>}"
+ACS_PASS="${4:?Usage: $0 <host> [port] <user> <pass>}"
 
 echo -e "${GREEN}[BillingHub ACS]${NC} Restore provisions & presets..."
 export BILLINGHUB_ROOT="$ROOT_DIR"

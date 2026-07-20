@@ -1,4 +1,16 @@
+# Credential & akses server — jangan commit
+servers-access.txt
+servers.billinghub.env
+**/acs-credentials.env
+**/*credentials*.env
+**/*.ppk
+**/*.pem
+**/*-access.txt
+.env
+.env.*
+!.env.example
+!servers.example.env
+
 backup/
 *.patched.js
-.env
 node_modules/

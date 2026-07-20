@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================
 # Generate + apply random credentials (UI = CWMP/TR-069 = NBI)
-# Jangan pakai default lemah (msn, admin/bilhub90).
-#
 # Usage:
-#   sudo BH_ACS_HOST=157.10.160.9 bash scripts/set-random-credentials.sh
+#   sudo BH_ACS_HOST=acs.example.com bash scripts/set-random-credentials.sh
 #
 # Optional:
 #   BH_ACS_PORT=7547
 #   BH_CRED_FILE=/opt/genieacs/acs-credentials.env
 # ============================================================
-set -euo pipefail
+# Jangan pakai password lemah / default publik.set -euo pipefail
 
 if [[ $EUID -ne 0 ]]; then
   echo "Jalankan dengan sudo" >&2
@@ -22,7 +20,7 @@ HOST="${BH_ACS_HOST:?Set BH_ACS_HOST}"
 PORT="${BH_ACS_PORT:-7547}"
 CRED_FILE="${BH_CRED_FILE:-/opt/genieacs/acs-credentials.env}"
 
-# Random username: bh_ + 8 alnum (bukan admin/msn)
+# Random username: bh_ + 8 hex
 USER="bh_$(openssl rand -hex 4)"
 # Random password: 20 hex chars
 PASS="$(openssl rand -hex 10)"

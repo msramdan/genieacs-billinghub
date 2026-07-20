@@ -53,12 +53,14 @@ NONINTERACTIVE="${BH_NONINTERACTIVE:-0}"
 if [[ "$NONINTERACTIVE" == "1" || "$NONINTERACTIVE" == "true" ]]; then
   ACS_HOST="${ACS_HOST:-${BH_ACS_HOST:-$LOCAL_IP}}"
   ACS_PORT="${ACS_PORT:-${BH_ACS_PORT:-7547}}"
-  ACS_USER="${ACS_USER:-${BH_ACS_USER:-msn}}"
-  ACS_PASS="${ACS_PASS:-${BH_ACS_PASS:-msn}}"
-  UI_ADMIN_PASS="${UI_ADMIN_PASS:-${BH_UI_PASS:-bilhub90}}"
+  ACS_USER="${ACS_USER:-${BH_ACS_USER:-admin}}"
+  # Placeholder — ACS Studio / set-random-credentials akan ganti setelah install
+  ACS_PASS="${ACS_PASS:-${BH_ACS_PASS:-changeme}}"
+  UI_ADMIN_PASS="${UI_ADMIN_PASS:-${BH_UI_PASS:-changeme}}"
   INSTALL_ZT="${INSTALL_ZT:-n}"
   log "Mode non-interactive (ACS Studio)"
 else
+  gen_pass() { openssl rand -hex 10 2>/dev/null || head -c 16 /dev/urandom | xxd -p | head -c 20; }
   echo ""
   ask "Domain/IP ACS CWMP [$LOCAL_IP]: "
   read -r ACS_HOST
@@ -68,17 +70,17 @@ else
   read -r ACS_PORT
   ACS_PORT="${ACS_PORT:-7547}"
 
-  ask "Username ACS TR-069 [msn]: "
+  ask "Username ACS TR-069 [admin]: "
   read -r ACS_USER
-  ACS_USER="${ACS_USER:-msn}"
+  ACS_USER="${ACS_USER:-admin}"
 
-  ask "Password ACS TR-069 [msn]: "
+  ask "Password ACS TR-069 [acak otomatis]: "
   read -r ACS_PASS
-  ACS_PASS="${ACS_PASS:-msn}"
+  ACS_PASS="${ACS_PASS:-$(gen_pass)}"
 
-  ask "Password admin UI GenieACS [bilhub90]: "
+  ask "Password admin UI GenieACS [acak otomatis / sama TR-069]: "
   read -r UI_ADMIN_PASS
-  UI_ADMIN_PASS="${UI_ADMIN_PASS:-bilhub90}"
+  UI_ADMIN_PASS="${UI_ADMIN_PASS:-$ACS_PASS}"
 
   ask "Install ZeroTier untuk NAT traversal? (y/n) [n]: "
   read -r INSTALL_ZT

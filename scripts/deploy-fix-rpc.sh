@@ -5,13 +5,13 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export BILLINGHUB_ROOT="$ROOT"
 
-ACS_HOST="${BH_ACS_HOST:-acs-annet.billinghub.id}"
+ACS_HOST="${BH_ACS_HOST:?Set BH_ACS_HOST}"
 ACS_PORT="${BH_ACS_PORT:-7547}"
-ACS_USER="${BH_ACS_USER:-msn}"
-ACS_PASS="${BH_ACS_PASS:-msn}"
+ACS_USER="${BH_ACS_USER:?Set BH_ACS_USER}"
+ACS_PASS="${BH_ACS_PASS:?Set BH_ACS_PASS}"
 
 if [[ $EUID -ne 0 ]]; then
-  echo "Jalankan: sudo BH_ACS_HOST=... bash scripts/deploy-fix-rpc.sh" >&2
+  echo "Jalankan: sudo BH_ACS_HOST=... BH_ACS_USER=... BH_ACS_PASS=... bash scripts/deploy-fix-rpc.sh" >&2
   exit 1
 fi
 
