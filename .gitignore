@@ -14,3 +14,5 @@ servers.billinghub.env
 backup/
 *.patched.js
 node_modules/
+
+scripts/diag-ssid-mismatch.mongosh.js
