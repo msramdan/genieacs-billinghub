@@ -17,8 +17,9 @@ services:
       - path: .env
         required: false
     environment:
-      - PORT=${PORT:-5173}
-      - NODE_ENV=${NODE_ENV:-production}
+      # Docker: satu proses serve UI+API di 5173
+      - PORT=5173
+      - NODE_ENV=production
       - AUTH_USER=${AUTH_USER:-admin}
       - AUTH_PASS=${AUTH_PASS:-billinghub01}
     restart: unless-stopped

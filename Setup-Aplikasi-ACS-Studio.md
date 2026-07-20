@@ -14,8 +14,8 @@ cp .env.example .env
 
 | Variabel | Default | Fungsi |
 |----------|---------|--------|
-| `PORT` | `5173` | Port HTTP ACS Studio |
-| `NODE_ENV` | `production` | Mode Node |
+| `PORT` | `5174` (lokal) | Port API; UI Vite di **5173**. Docker tetap **5173**. |
+| `NODE_ENV` | `development` | Mode Node |
 | `AUTH_USER` | `admin` | Username login Studio |
 | `AUTH_PASS` | `billinghub01` | Password login Studio |
 
