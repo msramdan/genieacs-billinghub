@@ -24,7 +24,6 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     localCss: fs.existsSync(LOCAL_CSS),
-    rollbackTag: "pre-theme-studio",
     authEnabled: auth.enabled,
   });
 });
@@ -207,5 +206,4 @@ const PORT = process.env.PORT || 5174;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`ACS Studio API         → http://0.0.0.0:${PORT}`);
   console.log(`Auth                  → ${auth.enabled ? "ON (env AUTH_USER/AUTH_PASS)" : "OFF"}`);
-  console.log(`Rollback git tag       → pre-theme-studio`);
 });

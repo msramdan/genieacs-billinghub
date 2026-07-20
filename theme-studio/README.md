@@ -1,18 +1,16 @@
-# ACS Studio
+# ACS Studio — Cara Install
 
-UI lokal untuk ganti **logo** + **nuansa warna** GenieACS BillingHub di server remote via **SSH**.
+Wizard UI untuk memasang **GenieACS BillingHub** di VPS kosong (logo, warna, opsional L2TP/MikroTik) lewat SSH.
 
-## Rollback
+## Persyaratan
 
-Sebelum ACS Studio dibuat, git tag:
+- Node.js **20+** (jalankan di PC), atau **Docker** (jalankan di server)
+- Repo `genieacs-billinghub` lengkap
+- Port **5173** bebas
 
-```bash
-git checkout pre-theme-studio
-# atau
-git reset --hard pre-theme-studio
-```
+---
 
-## Jalankan di PC (Windows/macOS/Linux)
+## A. Install di PC (tanpa Docker)
 
 ```bash
 cd theme-studio
@@ -20,24 +18,76 @@ npm install
 npm run dev
 ```
 
-- Web UI: http://127.0.0.1:5173  
-- API: http://127.0.0.1:5174  
+Buka: **http://127.0.0.1:5173**
 
-## Alur
+Opsional — aktifkan login:
 
-1. Isi **IP, Port SSH (22), Username, Password** VPS → **Test koneksi**
-2. Setelah OK → upload **logo** + pilih **template warna** (atau hex custom)
-3. **Deploy** → upload ke `genieacs/public/`, patch `app.css` + semua `app-*.css`, restart `genieacs-ui`
-4. Hard refresh browser ACS (`Ctrl+F5`)
+```bash
+# Linux / macOS
+AUTH_USER=admin AUTH_PASS=rahasia npm run dev
 
-## Catatan
+# Windows PowerShell
+$env:AUTH_USER="admin"; $env:AUTH_PASS="rahasia"; npm run dev
+```
 
-- Target install: **VPS / server / STB fresh** (kosong). Ideal 1 mesin = 1 ACS.
-- Sudah ada ACS + data device → jangan full install; pakai sync / ACS Studio saja.
-- Butuh akses **SSH** ke VPS (bukan login UI GenieACS `admin/...`)
-- User SSH perlu full akses (sudo/root) agar bisa tulis folder GenieACS public
-- Tidak menghapus device / config MongoDB — hanya asset UI
+---
 
-## Preset warna
+## B. Install dengan Docker (server)
 
-Teal (default BillingHub), Ocean, Ember, Forest, Slate, Rose — atau custom hex.
+Jalankan dari **root repo** `genieacs-billinghub`:
+
+```bash
+cd /path/ke/genieacs-billinghub
+
+export AUTH_USER=admin
+export AUTH_PASS='password-kuat'
+export PORT=5173
+
+docker compose -f theme-studio/docker-compose.yml up -d --build
+```
+
+Buka: **http://IP-SERVER:5173**
+
+Cek:
+
+```bash
+docker ps --filter name=ACS-Studio
+docker logs ACS-Studio --tail 20
+```
+
+### Update
+
+```bash
+cd /path/ke/genieacs-billinghub
+docker compose -f theme-studio/docker-compose.yml build
+docker rm -f ACS-Studio
+AUTH_USER=admin AUTH_PASS='...' PORT=5173 \
+  docker compose -f theme-studio/docker-compose.yml up -d
+```
+
+### Jika compose gagal buat network
+
+```bash
+docker compose -f theme-studio/docker-compose.yml build
+docker rm -f ACS-Studio 2>/dev/null || true
+docker run -d \
+  --name ACS-Studio \
+  --restart unless-stopped \
+  --network host \
+  -e PORT=5173 \
+  -e NODE_ENV=production \
+  -e AUTH_USER=admin \
+  -e AUTH_PASS='password-kuat' \
+  theme-studio-acs-studio:latest
+```
+
+---
+
+## Cara pakai
+
+1. Buka ACS Studio → login (jika auth aktif)
+2. Isi IP + SSH VPS kosong → Test koneksi
+3. L2TP/MikroTik (opsional) → Logo & warna → Instalasi
+4. Simpan username/password ACS yang muncul di akhir
+
+Gunakan **VPS fresh** (belum ada ACS). Jangan full-install ulang ke server yang sudah punya data device.

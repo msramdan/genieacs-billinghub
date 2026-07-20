@@ -45,16 +45,9 @@ flowchart TD
     O --> P[Summon OK]
 ```
 
-## ACS Studio (lokal)
+## ACS Studio
 
-UI lokal untuk ganti logo + warna ACS di VPS via SSH:
-
-```bash
-cd theme-studio && npm install && npm run dev
-```
-
-Buka http://127.0.0.1:5173 — lihat `theme-studio/README.md`.  
-Rollback: `git checkout pre-theme-studio`
+Cara install & pakai: **[theme-studio/README.md](theme-studio/README.md)**
 
 ## Instalasi cepat
 
