@@ -112,13 +112,11 @@ ipcp-accept-remote
 ms-dns 8.8.8.8
 noccp
 auth
-crtscts
 idle 1800
 mtu 1400
 mru 1400
 nodefaultroute
 debug
-lock
 proxyarp
 connect-delay 5000
 EOF

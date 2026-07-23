@@ -11,6 +11,17 @@ function connectMt(opts) {
   return api;
 }
 
+async function safeWrite(api, command, args = []) {
+  try {
+    return await api.write(command, args);
+  } catch (err) {
+    if ((err && err.errno === "UNKNOWNREPLY") || String(err).includes("!empty")) {
+      return [];
+    }
+    throw err;
+  }
+}
+
 function isPrivateIp(ip) {
   if (!ip) return false;
   if (ip.startsWith("10.")) return true;
@@ -149,7 +160,7 @@ async function setupMikrotikL2tp(opts) {
   try {
     await api.connect();
 
-    const existing = await api.write("/interface/l2tp-client/print", [
+    const existing = await safeWrite(api, "/interface/l2tp-client/print", [
       `?name=${l2tpName}`,
     ]);
     for (const row of existing || []) {
@@ -185,7 +196,7 @@ async function setupMikrotikL2tp(opts) {
     for (const net of nets) {
       const comment = `bh-acs-l2tp-${net}`;
       try {
-        const rules = await api.write("/ip/firewall/filter/print", [
+        const rules = await safeWrite(api, "/ip/firewall/filter/print", [
           `?comment=${comment}`,
         ]);
         if (!rules || !rules.length) {
@@ -204,7 +215,7 @@ async function setupMikrotikL2tp(opts) {
     }
 
     await new Promise((r) => setTimeout(r, 4000));
-    const statusRows = await api.write("/interface/l2tp-client/print", [
+    const statusRows = await safeWrite(api, "/interface/l2tp-client/print", [
       `?name=${l2tpName}`,
     ]);
     const st = statusRows && statusRows[0];
