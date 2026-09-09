@@ -1,4 +1,4 @@
-// Sync provisions from repo db/provisions/ (refresh-wlan, etc.)
+// Sync provisions from repo db/provisions/ (refresh-wlan, useradmin, etc.)
 const fs = require("fs");
 const path = require("path");
 
@@ -10,6 +10,7 @@ const provDir = path.join(root, "db", "provisions");
 const files = [
   ["refresh-wlan", "refresh-wlan.js"],
   ["refresh-lan", "refresh-lan.js"],
+  ["useradmin", "useradmin.js"],
 ];
 
 for (const [id, file] of files) {
@@ -19,6 +20,22 @@ for (const [id, file] of files) {
   db.provisions.updateOne({ _id: id }, { $set: { script } }, { upsert: true });
   print("OK provision:", id);
 }
+
+// Preset: auto-run useradmin on every session (ENABLED flag inside script)
+db.presets.updateOne(
+  { _id: "useradmin" },
+  {
+    $set: {
+      weight: 0,
+      channel: "useradmin",
+      precondition: "",
+      events: {},
+      configurations: [{ type: "provision", name: "useradmin", args: null }],
+    },
+  },
+  { upsert: true }
+);
+print("OK preset: useradmin");
 
 // VP overrides from db/virtualParameters/
 const vpDir = path.join(root, "db", "virtualParameters");

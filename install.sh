@@ -326,12 +326,18 @@ fi
 log "Restore virtual parameters, provisions, UI config..."
 bash "$ROOT_DIR/scripts/restore-db.sh"
 
+log "Sync provisions dari repo (refresh-lan/wlan, useradmin ONT)..."
+BILLINGHUB_ROOT="$ROOT_DIR" mongosh genieacs --quiet "$ROOT_DIR/scripts/sync-provisions-from-repo.mongosh.js"
+
 log "Patch provision inform -> $ACS_URL"
 bash "$ROOT_DIR/scripts/patch-inform.sh" "$ACS_URL" "$ACS_PORT" "$ACS_USER" "$ACS_PASS"
 
 # Set admin password
 log "Set password admin UI..."
 bash "$ROOT_DIR/scripts/set-admin-password.sh" "$UI_ADMIN_PASS"
+
+log "Fix capability ping UI (genieacs user)..."
+bash "$ROOT_DIR/scripts/fix-ping-capability.sh"
 
 systemctl restart genieacs-{cwmp,fs,ui,nbi}
 sleep 3

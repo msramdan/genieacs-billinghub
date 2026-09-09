@@ -3884,7 +3884,7 @@
 {"_id":"ui.index.1.parameters.11","value":"VirtualParameters.activedevices"},
 {"_id":"ui.index.4.type","value":"'device-link'"},
 {"_id":"ui.index.4.label","value":"'ID'"},
-{"_id":"ui.index.4.parameter","value":"COALESCE(VirtualParameters.pppoeUsername2, VirtualParameters.pppoeUsername, InternetGatewayDevice.WANDevice.1.WANConnectionDevice.3.WANPPPConnection.1.Username, InternetGatewayDevice.WANDevice.1.WANConnectionDevice.2.WANPPPConnection.1.Username, InternetGatewayDevice.WANDevice.1.WANConnectionDevice.1.WANPPPConnection.1.Username, DeviceID.SerialNumber)"},
+{"_id":"ui.index.4.parameter","value":"VirtualParameters.pppoeUsername2"},
 {"_id":"ui.index.4.components.0.type","value":"'parameter'"},
 {"_id":"ui.index.4.writable","value":"false"}
 ]

@@ -42,22 +42,25 @@ echo " Server ACS : http://${BH_ACS_HOST}:${BH_ACS_PORT}"
 echo " Repo       : $ROOT"
 echo "================================================================"
 
-echo "=== [1/6] UI tema BillingHub ==="
+echo "=== [1/7] UI tema BillingHub ==="
 bash "$ROOT/scripts/deploy-ui-theme.sh"
 
-echo "=== [2/6] Import VP, provisions, presets, config (devices TIDAK dihapus) ==="
+echo "=== [2/7] Import VP, provisions, presets, config (devices TIDAK dihapus) ==="
 bash "$ROOT/scripts/restore-db.sh"
 
-echo "=== [3/6] Provisions & VP dari db/provisions + db/virtualParameters ==="
+echo "=== [3/7] Provisions & VP dari db/provisions + db/virtualParameters ==="
 mongosh genieacs --quiet "$ROOT/scripts/sync-provisions-from-repo.mongosh.js"
 
-echo "=== [4/6] Patch inform -> domain server ==="
+echo "=== [4/7] Patch inform -> domain server ==="
 bash "$ROOT/scripts/patch-inform.sh" "$BH_ACS_HOST" "$BH_ACS_PORT" "$BH_ACS_USER" "$BH_ACS_PASS"
 
-echo "=== [5/6] Password admin UI ==="
+echo "=== [5/7] Password admin UI ==="
 bash "$ROOT/scripts/set-admin-password.sh" "$BH_UI_PASS"
 
-echo "=== [6/6] Restart GenieACS ==="
+echo "=== [6/7] Fix capability ping UI (genieacs user) ==="
+bash "$ROOT/scripts/fix-ping-capability.sh"
+
+echo "=== [7/7] Restart GenieACS ==="
 systemctl restart genieacs-{cwmp,fs,ui,nbi}
 sleep 3
 

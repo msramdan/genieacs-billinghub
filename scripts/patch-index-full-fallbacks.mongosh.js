@@ -121,7 +121,7 @@ const SN = coalesce(
 
 const patches = [
   { _id: "ui.index.3.parameter", value: PON },
-  { _id: "ui.index.4.parameter", value: PPP_USER },
+  { _id: "ui.index.4.parameter", value: "VirtualParameters.pppoeUsername2" },
   { _id: "ui.index.5.parameter", value: SSID },
   { _id: "ui.index.6.parameter", value: ACTIVE },
   { _id: "ui.index.7.parameter", value: RX },
