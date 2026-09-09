@@ -2,6 +2,8 @@
 
 Panduan memasang aplikasi **ACS Studio** (UI wizard) di PC atau server.
 
+Untuk alur pemula (install ACS ke VPS, modem, L2TP/Summon): lihat **[Panduan-Pemula-ACS.md](Panduan-Pemula-ACS.md)**.
+
 ## Konfigurasi (env pusat)
 
 Semua setting UI ada di **`theme-studio/.env`**:
