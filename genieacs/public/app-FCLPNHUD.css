@@ -2017,8 +2017,45 @@ body:has(#content.page-login) {
     background: #0f1419
 }
 
+/* Keep drawer/notifications visible on login; hide the rest of the header chrome */
 body:has(#content.page-login) #header {
-    display: none
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    overflow: visible;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    z-index: 1000
+}
+
+body:has(#content.page-login) #header > *:not(.drawer-wrapper) {
+    display: none !important
+}
+
+body:has(#content.page-login) #header > .drawer-wrapper {
+    display: block;
+    width: min(420px, 92vw);
+    margin-left: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 16px
+}
+
+#content.page-login .bh-login-error {
+    display: block;
+    background: #7f1d1d;
+    color: #fecaca;
+    border: 1px solid #dc2626;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 0 0 16px;
+    font-size: .9rem;
+    line-height: 1.4;
+    text-align: center
 }
 
 #content-wrapper:has(#content.page-login) {

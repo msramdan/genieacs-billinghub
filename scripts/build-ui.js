@@ -25,6 +25,11 @@ if (fs.existsSync(patchUi)) {
   require("child_process").execFileSync("node", [patchUi], { stdio: "inherit" });
 }
 
+const patchLogin = path.join(__dirname, "patch-login-error.js");
+if (fs.existsSync(patchLogin)) {
+  require("child_process").execFileSync("node", [patchLogin], { stdio: "inherit" });
+}
+
 const jsFiles = fs.readdirSync(pub).filter((f) => /^app.*\.js$/.test(f) && !f.endsWith(".map"));
 let jsPatched = 0;
 for (const file of jsFiles) {

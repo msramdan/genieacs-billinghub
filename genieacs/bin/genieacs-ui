@@ -89,6 +89,10 @@ declare("Device.ManagementServer.PeriodicInformTime", {value: daily}, {value: in
       
       
       
+      
+      
+      
+      
       <title>GenieACS</title>
       <link rel="shortcut icon" type="image/png" href="${Ds}" />
       <link rel="stylesheet" href="${Ls}"><script>(function(){try{var t=localStorage.getItem("bh-theme");if(t==="light")document.documentElement.setAttribute("data-bh-theme","light")}catch(e){}})();</script>
