@@ -28,7 +28,7 @@ load(path.join(scriptsDir, "patch-wifi-connected-v4.mongosh.js"));
 load(path.join(scriptsDir, "patch-provision-password-cache.mongosh.js"));
 load(path.join(scriptsDir, "patch-preset-default-boot.mongosh.js"));
 
-// refresh-wlan on BOOT only — not every inform (too_many_rpcs with inform + heavy VP scripts)
+// refresh-wlan every Inform — phased script pulls one WLAN attrs set per session (SSID-LIST not blank)
 db.presets.updateOne(
   { _id: "refresh-wlan" },
   {
@@ -36,13 +36,13 @@ db.presets.updateOne(
       weight: 1,
       channel: "default",
       precondition: "",
-      events: { "0 BOOTSTRAP": true, "1 BOOT": true },
+      events: {},
       configurations: [{ type: "provision", name: "refresh-wlan", args: null }],
     },
   },
   { upsert: true }
 );
-print("OK preset refresh-wlan -> BOOT only");
+print("OK preset refresh-wlan -> every inform (phased)");
 
 db.cache.deleteMany({});
 print("=== apply-patches done ===");

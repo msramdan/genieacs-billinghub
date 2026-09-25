@@ -1,4 +1,4 @@
-// Move refresh-wlan off every inform — WiFi client refresh on boot only (VP activedevices still updates via inform)
+// Ensure refresh-wlan runs every Inform (phased light script — fills SSID-LIST without Summon)
 db.presets.updateOne(
   { _id: "refresh-wlan" },
   {
@@ -6,12 +6,10 @@ db.presets.updateOne(
       weight: 1,
       channel: "default",
       precondition: "",
-      events: { "0 BOOTSTRAP": true, "1 BOOT": true },
+      events: {},
       configurations: [{ type: "provision", name: "refresh-wlan", args: null }],
     },
-  }
+  },
+  { upsert: true }
 );
-print("OK refresh-wlan preset -> BOOT only (not every inform)");
-
-const n = db.faults.deleteMany({ code: { $in: ["too_many_rpcs", "too_many_commits"] } }).deletedCount;
-print("Cleared faults:", n);
+print("OK refresh-wlan preset -> every inform (phased)");

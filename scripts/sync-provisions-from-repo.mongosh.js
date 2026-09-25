@@ -37,6 +37,22 @@ db.presets.updateOne(
 );
 print("OK preset: useradmin");
 
+// refresh-wlan every Inform (phased/light) so SSID-LIST Security/Channel/etc fill without manual Summon
+db.presets.updateOne(
+  { _id: "refresh-wlan" },
+  {
+    $set: {
+      weight: 1,
+      channel: "default",
+      precondition: "",
+      events: {},
+      configurations: [{ type: "provision", name: "refresh-wlan", args: null }],
+    },
+  },
+  { upsert: true }
+);
+print("OK preset: refresh-wlan (every inform, phased)");
+
 // VP overrides from db/virtualParameters/
 const vpDir = path.join(root, "db", "virtualParameters");
 if (fs.existsSync(vpDir)) {
