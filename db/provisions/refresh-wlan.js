@@ -1,5 +1,15 @@
 // refresh-wlan — light phased refresh (stay under ~64 RPCs per inform session)
 const update = Date.now(120000);
+
+// BillingHub: pull common WLAN attrs so Security/Broadcast/Power/Channel not blank
+const wlanAttrs = ["BeaconType","SSIDAdvertisementEnabled","TransmitPower","AutoChannelEnable","Channel","KeyPassphrase","Enable","SSID","RadioEnabled"];
+for (let w = 1; w <= 8; w++) {
+  for (const a of wlanAttrs) {
+    declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration." + w + "." + a, {value: update});
+  }
+  declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration." + w + ".PreSharedKey.1.KeyPassphrase", {value: update});
+}
+
 const slow = Date.now(300000);
 const phase = Math.floor(Date.now() / 120000) % 6;
 
