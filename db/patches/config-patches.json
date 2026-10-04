@@ -13,39 +13,43 @@
   },
   {
     "_id": "ui.device.3.components.21.childParameters.3.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.4.components.10.childParameters.3.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.10.components.5.childParameters.2.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.14.components.1.components.0.childParameters.3.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
+  },
+  {
+    "_id": "ui.device.14.components.1.components.0.childParameters.4.parameter",
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.14.components.2.components.0.childParameters.3.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.8.components.15.childParameters.4.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.8.components.15.childParameters.5.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.11.components.15.childParameters.3.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "ui.device.12.components.8.childParameters.3.parameter",
-    "value": "COALESCE(PreSharedKey.1.KeyPassphrase, KeyPassphrase, PreSharedKey.1.PreSharedKey, VirtualParameters.WlanPassword)"
+    "value": "PreSharedKey.1.KeyPassphrase"
   },
   {
     "_id": "cwmp.connectionRequestTimeout",
