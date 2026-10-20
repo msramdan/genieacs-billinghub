@@ -21,14 +21,17 @@ const NEW =
   'box.textContent=m;box.setAttribute("role","alert")}catch(x){}' +
   't.target.disabled=!1})';
 
-// Also clear error banner when user tries again
-const OLD_CLICK =
-  'onclick:t=>(t.target.disabled=!0,Io(e.state.username,e.state.password)';
-const NEW_CLICK =
-  'onclick:t=>(t.target.disabled=!0,' +
+// Also clear error banner when user tries again.
+// Wrapped in an IIFE: a bare try{} inside the comma expression is a SyntaxError
+// (older versions of this patch broke app.js / app-FOJWPRV7 / app-JZ65BHVX that way).
+// Login fn name differs per bundle (Io, ko, …) — match any identifier.
+const CLEAR =
+  '(()=>{try{var b=document.querySelector("#content.page-login .bh-login-error");' +
+  "if(b)b.remove()}catch(x){}})(),";
+const BROKEN_CLEAR =
   'try{var b=document.querySelector("#content.page-login .bh-login-error");' +
-  'if(b)b.remove()}catch(x){},' +
-  'Io(e.state.username,e.state.password)';
+  "if(b)b.remove()}catch(x){},";
+const CLICK_RE = /onclick:t=>\(t\.target\.disabled=!0,([\w$]+\(e\.state\.username,e\.state\.password\))/;
 
 let patched = 0;
 for (const file of jsFiles) {
@@ -36,7 +39,8 @@ for (const file of jsFiles) {
   let js = fs.readFileSync(fp, "utf8");
   const before = js;
   if (js.includes(OLD)) js = js.split(OLD).join(NEW);
-  if (js.includes(OLD_CLICK)) js = js.split(OLD_CLICK).join(NEW_CLICK);
+  if (js.includes(BROKEN_CLEAR) && !js.includes(CLEAR)) js = js.split(BROKEN_CLEAR).join(CLEAR);
+  if (!js.includes(CLEAR)) js = js.replace(CLICK_RE, "onclick:t=>(t.target.disabled=!0," + CLEAR + "$1");
   if (js !== before) {
     fs.writeFileSync(fp, js);
     patched++;
