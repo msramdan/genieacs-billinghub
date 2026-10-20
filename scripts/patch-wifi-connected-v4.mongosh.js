@@ -101,9 +101,10 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
     upsert(`${prefix}.components.1.parameter`, adParam);
     db.config.deleteOne({ _id: `${prefix}.components.1.filter` });
     upsert(`${prefix}.components.1.childParameters.0.label`, "'Host Name'");
+    // X_BH_HostName = LAN Host name matched by MAC/IP, added client-side (patch-wifi-hostname.js)
     upsert(
       `${prefix}.components.1.childParameters.0.parameter`,
-      `COALESCE(VirtualParameters.wifiClientHostName, ${HOST_NAME})`
+      HOST_NAME.replace(/\)$/, ", X_BH_HostName)")
     );
     upsert(`${prefix}.components.1.childParameters.1.label`, "'IP Address'");
     upsert(

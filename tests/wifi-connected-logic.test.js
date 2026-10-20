@@ -9,6 +9,7 @@ const {
   resolveWifiClientIP,
   resolveWifiClientMac,
   analyzeWifiDisplay,
+  bhAddWifiHostNames,
 } = require("../lib/wifi-connected-logic");
 
 describe("filter builders (short — max 8 slots)", () => {
@@ -235,6 +236,56 @@ describe("analyzeWifiDisplay — real device scenarios", () => {
     assert.equal(a.lanHostCount, 3);
     assert.equal(a.wifiHostCount, 1);
     assert.equal(a.expectedWifiListCount, a.totalAssociations);
+  });
+});
+
+describe("bhAddWifiHostNames (UI bundle helper)", () => {
+  const AD = "InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDevice";
+  const H = "InternetGatewayDevice.LANDevice.1.Hosts.Host";
+  const p = (v) => ({ value: [v, "xsd:string"], valueTimestamp: 1 });
+  // REDNET ZICG XPW300 "DAUN RIMBUN" — AD rows carry no name field
+  const device = {
+    [`${AD}.5.AssociatedDeviceIPAddress`]: p("192.168.1.5"),
+    [`${AD}.5.AssociatedDeviceMACAddress`]: p("22:B5:77:CD:12:45"),
+    [`${AD}.9.AssociatedDeviceIPAddress`]: p("192.168.1.4"),
+    [`${AD}.9.AssociatedDeviceMACAddress`]: p("7e:51:36:12:49:2a"),
+    [`${AD}.10.AssociatedDeviceIPAddress`]: p("192.168.1.99"),
+    [`${H}.9.HostName`]: p("Infinix-NOTE-Edge"),
+    [`${H}.9.MACAddress`]: p("22:B5:77:CD:12:45"),
+    [`${H}.9.IPAddress`]: p("192.168.1.5"),
+    [`${H}.5.HostName`]: p("Infinix-NOTE-50-Pro"),
+    [`${H}.5.MACAddress`]: p("7E:51:36:12:49:2A"),
+    [`${H}.7.HostName`]: p(""),
+    [`${H}.7.MACAddress`]: p("4E:CC:A6:06:20:E9"),
+  };
+
+  it("adds X_BH_HostName by MAC (case-insensitive), skips rows without a match", () => {
+    const out = bhAddWifiHostNames(device);
+    assert.notEqual(out, device, "must not mutate the UI store object");
+    assert.equal(out[`${AD}.5.X_BH_HostName`].value[0], "Infinix-NOTE-Edge");
+    assert.equal(out[`${AD}.9.X_BH_HostName`].value[0], "Infinix-NOTE-50-Pro");
+    assert.equal(out[`${AD}.10.X_BH_HostName`], undefined);
+    assert.equal(device[`${AD}.5.X_BH_HostName`], undefined);
+  });
+
+  it("falls back to IP match when AD row has no MAC", () => {
+    const d = {
+      [`${AD}.1.AssociatedDeviceIPAddress`]: p("192.168.1.5"),
+      [`${H}.9.HostName`]: p("Infinix-NOTE-Edge"),
+      [`${H}.9.IPAddress`]: p("192.168.1.5"),
+    };
+    assert.equal(bhAddWifiHostNames(d)[`${AD}.1.X_BH_HostName`].value[0], "Infinix-NOTE-Edge");
+  });
+
+  it("returns the same object when there is nothing to add", () => {
+    const d = { [`${AD}.1.AssociatedDeviceMACAddress`]: p("AA:BB:CC:DD:EE:FF") };
+    assert.equal(bhAddWifiHostNames(d), d);
+    assert.equal(bhAddWifiHostNames(null), null);
+  });
+
+  it("is self-contained so it can be embedded via toString()", () => {
+    const f = new Function("return " + bhAddWifiHostNames.toString())();
+    assert.equal(f(device)[`${AD}.5.X_BH_HostName`].value[0], "Infinix-NOTE-Edge");
   });
 });
 

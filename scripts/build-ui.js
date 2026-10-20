@@ -30,6 +30,11 @@ if (fs.existsSync(patchLogin)) {
   require("child_process").execFileSync("node", [patchLogin], { stdio: "inherit" });
 }
 
+const patchWifiHostname = path.join(__dirname, "patch-wifi-hostname.js");
+if (fs.existsSync(patchWifiHostname)) {
+  require("child_process").execFileSync("node", [patchWifiHostname], { stdio: "inherit" });
+}
+
 const jsFiles = fs.readdirSync(pub).filter((f) => /^app.*\.js$/.test(f) && !f.endsWith(".map"));
 let jsPatched = 0;
 for (const file of jsFiles) {
