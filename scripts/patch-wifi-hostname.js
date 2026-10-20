@@ -15,15 +15,16 @@ const jsFiles = fs
 
 const MARK_START = "/*bh-wifi-hostname:start*/";
 const MARK_END = "/*bh-wifi-hostname:end*/";
+// No cache: recomputed per render so in-place store updates (e.g. after an edit) never go stale.
+// Any error falls back to the untouched device object — the table renders exactly as stock.
 const HELPER =
   MARK_START +
-  "window.__bhHostNames=(function(){var c=new WeakMap();var f=" +
+  "window.__bhHostNames=(function(){var f=" +
   bhAddWifiHostNames.toString() +
-  ";return function(d){if(!d||typeof d!==\"object\")return d;var r=c.get(d);" +
-  "if(!r){try{r=f(d)}catch(x){r=d}c.set(d,r)}return r}})();" +
+  ";return function(d){try{return f(d)}catch(x){return d}}})();" +
   MARK_END;
 
-// parameter-table view: device -> device with X_BH_HostName (cached per device object)
+// parameter-table view: device -> device with X_BH_HostName
 const ANCHOR = /(e\.state\.parameters=Object\.values\(e\.attrs\.childParameters\)\},view:e=>\{let t=)e\.attrs\.device,/;
 const PATCHED = "e.state.parameters=Object.values(e.attrs.childParameters)},view:e=>{let t=window.__bhHostNames(e.attrs.device),";
 

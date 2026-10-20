@@ -36,6 +36,10 @@ declare(
   { value: update }
 );
 
+// FiberHome SSID-LIST column (ui.device.8) reads it — keep fetching as before
+declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDeviceNumberOfEntries", {
+  value: 1,
+});
 declare("InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries", { value: update });
 
 // Every Inform: WiFi counter + client list + LAN Hosts together, so "Connected",
