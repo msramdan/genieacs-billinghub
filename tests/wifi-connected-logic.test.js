@@ -193,4 +193,61 @@ describe("analyzeWifiDisplay — real device scenarios", () => {
     assert.equal(a.showHostPrimary, true);
     assert.equal(a.wifiHostCount, 1);
   });
+
+  it("REDNET GM220: Connected=1, AD=0 — only active WiFi host, no LAN / stale lease", () => {
+    const device = {
+      InternetGatewayDevice: {
+        LANDevice: {
+          1: {
+            WLANConfiguration: {
+              1: { TotalAssociations: { _value: 1 }, AssociatedDevice: {} },
+            },
+            Hosts: {
+              Host: {
+                10: {
+                  IPAddress: { _value: "192.168.1.6" },
+                  MACAddress: { _value: "BC:AE:C5:86:99:05" },
+                  HostName: { _value: "eros" },
+                  InterfaceType: { _value: "Ethernet" },
+                  Active: { _value: true },
+                },
+                11: {
+                  IPAddress: { _value: "192.168.1.8" },
+                  MACAddress: { _value: "26:95:70:D8:7D:2A" },
+                  HostName: { _value: "Z2473" },
+                  InterfaceType: { _value: "802.11" },
+                  Active: { _value: true },
+                },
+                12: {
+                  IPAddress: { _value: "192.168.1.4" },
+                  MACAddress: { _value: "42:89:09:FF:E6:FE" },
+                  InterfaceType: { _value: "802.11" },
+                  Active: { _value: false },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const a = analyzeWifiDisplay(device);
+    assert.equal(a.showHostPrimary, true);
+    assert.equal(a.lanHostCount, 3);
+    assert.equal(a.wifiHostCount, 1);
+    assert.equal(a.expectedWifiListCount, a.totalAssociations);
+  });
+});
+
+describe("host row filters", () => {
+  it("isWifiHostRow rejects inactive lease", () => {
+    assert.equal(isWifiHostRow({ type: "802.11", ip: "192.168.1.4", active: false }), false);
+  });
+  it("isWifiHostRow keeps row when Active not reported", () => {
+    assert.equal(isWifiHostRow({ type: "802.11", ip: "192.168.1.4", active: null }), true);
+  });
+  it("hostWifiRowFilter requires Active (or missing Active)", () => {
+    const f = hostWifiRowFilter();
+    assert.ok(f.includes("Active IS NULL"));
+    assert.ok(f.includes("Active = true"));
+  });
 });

@@ -64,23 +64,20 @@ declare("InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries", { value: 
 if (phase === 0 || phase === 1) {
   refreshAdSlots(wlan, 8);
 } else if (phase === 2 || phase === 3) {
-  for (let i = 1; i <= 12; i++) {
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".IPAddress", {
-      path: update,
-      value: update,
-    });
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".MACAddress", {
+  // Wildcard: host instance ids grow past 12 on some ONTs (GM220 Host.19);
+  // path refresh also drops instances the ONT no longer reports.
+  // Active + InterfaceType feed the Wifi Connected fallback (AssociatedDevice empty).
+  for (const a of ["IPAddress", "MACAddress", "Active", "InterfaceType"]) {
+    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host.*." + a, {
       path: update,
       value: update,
     });
   }
 } else if (phase === 4 || phase === 5) {
-  for (let i = 1; i <= 12; i++) {
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".HostName", {
-      path: slow,
-      value: slow,
-    });
-  }
+  declare("InternetGatewayDevice.LANDevice.1.Hosts.Host.*.HostName", {
+    path: slow,
+    value: slow,
+  });
 } else {
   declare("InternetGatewayDevice.LANDevice.*.WLANConfiguration.*.TotalAssociations", {
     path: update,

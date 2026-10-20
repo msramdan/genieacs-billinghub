@@ -1,5 +1,6 @@
-// Wifi Connected v4 — AssociatedDevice only (GenieACS standard)
-// LAN Host belongs in separate DHCP section, NOT duplicated under Wifi Connected
+// Wifi Connected v4 — AssociatedDevice first (GenieACS standard)
+// Fallback only when ONT reports TotalAssociations > 0 but no AssociatedDevice rows:
+// active WiFi rows from Hosts.Host (no separate DHCP section, no stale leases)
 // Loaded by apply-patches.mongosh.js
 
 const fs = require("fs");
@@ -39,6 +40,16 @@ function adAllEmptyFilter(wlan) {
   const b = wlanBase(wlan);
   return `(${b}.TotalAssociations > 0) AND (${parts.join(" AND ")})`;
 }
+
+/** Row-level (Hosts.Host): active WiFi client — keep in sync with lib/wifi-connected-logic.js */
+function hostWifiRowFilter() {
+  return (
+    "((InterfaceType = '802.11') OR (InterfaceType IS NULL AND NOT (IPAddress LIKE '10.%')))" +
+    " AND ((Active IS NULL) OR (Active = true) OR (Active = 'true') OR (Active = 1) OR (Active = '1'))"
+  );
+}
+
+const HOSTS = "InternetGatewayDevice.LANDevice.1.Hosts.Host";
 
 const HOST_NAME =
   "COALESCE(X_ZTE-COM_AssociatedDeviceName, X_HW_AssociatedDevicedescriptions, X_CT-COM_AssociatedDeviceName, HostName, AssociatedDeviceName)";
@@ -105,29 +116,40 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
       "COALESCE(VirtualParameters.wifiClientMac, AssociatedDeviceMACAddress)"
     );
 
-    // Table 2 — info only when ONT has counter but no AssociatedDevice (no fake DHCP list)
+    // Table 2 — ONT has counter but no AssociatedDevice (GM220/CMCC): show ACTIVE WiFi rows
+    // from Hosts.Host. Row filter drops LAN + stale DHCP leases (Active=false) — no fake clients.
     upsert(`${prefix}.components.2.type`, "'container'");
     upsert(`${prefix}.components.2.filter`, adAllEmptyFilter(wlan));
     upsert(`${prefix}.components.2.components.0.type`, "'parameter-list'");
     upsert(
       `${prefix}.components.2.components.0.parameters.0.label`,
-      "'Connected = counter WiFi ONT. Detail client tidak dikirim via AssociatedDevice — klik Summon untuk refresh.'"
+      "'ONT tidak kirim AssociatedDevice — daftar dari LAN Host aktif (WiFi).'"
     );
     upsert(`${prefix}.components.2.components.0.parameters.0.element`, "'span.inform'");
+    upsert(`${prefix}.components.2.components.1.type`, "'parameter-table'");
+    upsert(`${prefix}.components.2.components.1.parameter`, HOSTS);
+    upsert(`${prefix}.components.2.components.1.filter`, hostWifiRowFilter());
+    upsert(`${prefix}.components.2.components.1.childParameters.0.label`, "'Host Name'");
+    upsert(`${prefix}.components.2.components.1.childParameters.0.parameter`, "HostName");
+    upsert(`${prefix}.components.2.components.1.childParameters.1.label`, "'IP Address'");
+    upsert(`${prefix}.components.2.components.1.childParameters.1.parameter`, "IPAddress");
+    upsert(`${prefix}.components.2.components.1.childParameters.2.label`, "'MAC Addr'");
+    upsert(`${prefix}.components.2.components.1.childParameters.2.parameter`, "MACAddress");
 
     // Summon — fetch all AD slots (forum: explicit declare when GPV skips unreported paths)
-    upsert(
-      `${prefix}.components.0.parameters.0.components.0.parameters.0`,
-      `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceIPAddress`
-    );
-    upsert(
-      `${prefix}.components.0.parameters.0.components.0.parameters.1`,
-      `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceMACAddress`
-    );
-    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.2` });
-    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.3` });
-    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.4` });
-    db.config.deleteOne({ _id: `${prefix}.components.0.parameters.0.components.0.parameters.5` });
+    // + Hosts fields used by table 2 fallback
+    const summon = `${prefix}.components.0.parameters.0.components.0.parameters`;
+    const summonParams = [
+      `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceIPAddress`,
+      `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceMACAddress`,
+      `${HOSTS}.*.HostName`,
+      `${HOSTS}.*.IPAddress`,
+      `${HOSTS}.*.MACAddress`,
+      `${HOSTS}.*.InterfaceType`,
+      `${HOSTS}.*.Active`,
+    ];
+    summonParams.forEach((p, i) => upsert(`${summon}.${i}`, p));
+    for (let i = summonParams.length; i < 10; i++) db.config.deleteOne({ _id: `${summon}.${i}` });
   }
 }
 
