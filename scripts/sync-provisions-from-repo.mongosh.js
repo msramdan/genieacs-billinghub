@@ -9,6 +9,7 @@ const root =
 const provDir = path.join(root, "db", "provisions");
 const files = [
   ["refresh-wlan", "refresh-wlan.js"],
+  ["refresh-hosts", "refresh-hosts.js"],
   ["refresh-lan", "refresh-lan.js"],
   ["useradmin", "useradmin.js"],
 ];
@@ -52,6 +53,23 @@ db.presets.updateOne(
   { upsert: true }
 );
 print("OK preset: refresh-wlan (every inform, phased)");
+
+// refresh-hosts every Inform, OWN channel — phantom Host instances on some ONTs (ZICG
+// F663NV3a / M69X) loop GetParameterNames until too_many_rpcs; isolated, only this channel faults
+db.presets.updateOne(
+  { _id: "refresh-hosts" },
+  {
+    $set: {
+      weight: 2,
+      channel: "refresh-hosts",
+      precondition: "",
+      events: {},
+      configurations: [{ type: "provision", name: "refresh-hosts", args: null }],
+    },
+  },
+  { upsert: true }
+);
+print("OK preset: refresh-hosts (own channel)");
 
 // VP overrides from db/virtualParameters/
 const vpDir = path.join(root, "db", "virtualParameters");

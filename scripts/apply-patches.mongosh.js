@@ -44,5 +44,33 @@ db.presets.updateOne(
 );
 print("OK preset refresh-wlan -> every inform (phased)");
 
+const fsRefreshHosts = require("fs");
+const refreshHosts = path.join(root, "db", "provisions", "refresh-hosts.js");
+if (fsRefreshHosts.existsSync(refreshHosts)) {
+  db.provisions.updateOne(
+    { _id: "refresh-hosts" },
+    { $set: { script: fsRefreshHosts.readFileSync(refreshHosts, "utf8") } },
+    { upsert: true }
+  );
+  print("OK provision refresh-hosts");
+}
+
+// refresh-hosts every Inform, OWN channel — phantom Host instances on some ONTs (ZICG
+// F663NV3a / M69X) loop GetParameterNames until too_many_rpcs; isolated, only this channel faults
+db.presets.updateOne(
+  { _id: "refresh-hosts" },
+  {
+    $set: {
+      weight: 2,
+      channel: "refresh-hosts",
+      precondition: "",
+      events: {},
+      configurations: [{ type: "provision", name: "refresh-hosts", args: null }],
+    },
+  },
+  { upsert: true }
+);
+print("OK preset: refresh-hosts (own channel)");
+
 db.cache.deleteMany({});
 print("=== apply-patches done ===");

@@ -63,24 +63,10 @@ declare("InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries", { value: 
 // Rotate associated-device / hosts refresh (lighter than dumping all every time)
 if (phase === 0 || phase === 1) {
   refreshAdSlots(wlan, 8);
-} else if (phase === 2 || phase === 3) {
-  for (let i = 1; i <= 12; i++) {
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".IPAddress", {
-      path: update,
-      value: update,
-    });
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".MACAddress", {
-      path: update,
-      value: update,
-    });
-  }
-} else if (phase === 4 || phase === 5) {
-  for (let i = 1; i <= 12; i++) {
-    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".HostName", {
-      path: slow,
-      value: slow,
-    });
-  }
+} else if (phase >= 2 && phase <= 5) {
+  // LAN Hosts refresh moved to provision "refresh-hosts" (own channel, same phases/logic):
+  // ONTs that list phantom Host instances (ZICG F663NV3a / M69X) loop GetParameterNames there
+  // until too_many_rpcs; in its own channel only that channel faults, not "default".
 } else {
   declare("InternetGatewayDevice.LANDevice.*.WLANConfiguration.*.TotalAssociations", {
     path: update,
