@@ -138,16 +138,12 @@ for (const [tab, comps] of Object.entries(WIFI_COMPS)) {
     upsert(`${prefix}.components.2.components.1.childParameters.2.parameter`, "MACAddress");
 
     // Summon — fetch all AD slots (forum: explicit declare when GPV skips unreported paths)
-    // + Hosts fields used by table 2 fallback
+    // Do NOT add Hosts.Host.*.<leaf> here: ONTs with phantom Host instances (ZICG M69X /
+    // F663NV3a answer 9005 on them) loop GetParameterNames until too_many_rpcs.
     const summon = `${prefix}.components.0.parameters.0.components.0.parameters`;
     const summonParams = [
       `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceIPAddress`,
       `${wlanBasePath}.AssociatedDevice.*.AssociatedDeviceMACAddress`,
-      `${HOSTS}.*.HostName`,
-      `${HOSTS}.*.IPAddress`,
-      `${HOSTS}.*.MACAddress`,
-      `${HOSTS}.*.InterfaceType`,
-      `${HOSTS}.*.Active`,
     ];
     summonParams.forEach((p, i) => upsert(`${summon}.${i}`, p));
     for (let i = summonParams.length; i < 10; i++) db.config.deleteOne({ _id: `${summon}.${i}` });

@@ -36,41 +36,52 @@ declare(
   { value: update }
 );
 
-// FiberHome SSID-LIST column (ui.device.8) reads it — keep fetching as before
+function totalAssoc(slot) {
+  const d = declare(
+    "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + slot + ".TotalAssociations",
+    { value: 1 }
+  );
+  return d.size && d.value[0] ? Number(d.value[0]) : 0;
+}
+
+function refreshAdSlots(slot, maxSlot) {
+  const n = Math.min(Math.max(maxSlot, totalAssoc(slot), 1), 8);
+  for (let i = 1; i <= n; i++) {
+    const base =
+      "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + slot + ".AssociatedDevice." + i;
+    declare(base + ".AssociatedDeviceIPAddress", { path: update, value: update });
+    declare(base + ".AssociatedDeviceMACAddress", { path: update, value: update });
+    declare(base + ".AssociatedDeviceHostName", { path: slow, value: slow });
+  }
+}
+
 declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.1.AssociatedDeviceNumberOfEntries", {
   value: 1,
 });
-declare("InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries", { value: update });
+declare("InternetGatewayDevice.LANDevice.1.Hosts.HostNumberOfEntries", { value: 1 });
 
-// Every Inform: WiFi counter + client list + LAN Hosts together, so "Connected",
-// Wifi Connected rows and Host Name (matched from Hosts by MAC) come from the same moment.
-// Wildcards, not slots 1..8: instance ids are sparse/high on some ONTs (ZICG AD.9, GM220 Host.19);
-// path refresh also drops clients that left. ~6 RPCs on top of the SSID attrs above.
-const assoc = declare("InternetGatewayDevice.LANDevice.1.WLANConfiguration.*.TotalAssociations", {
-  value: update,
-});
-for (const p of assoc) {
-  const slot = p.path.split(".")[4];
-  const n = p.value && p.value[0] != null ? Number(p.value[0]) : 0;
-  const ad = "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + slot + ".AssociatedDevice.*";
-  // refresh when clients are connected, or to clear rows cached from before they left
-  if (n > 0 || declare(ad, { path: 1 }).size) {
-    declare(ad + ".AssociatedDeviceMACAddress", { path: update, value: update });
-    declare(ad + ".AssociatedDeviceIPAddress", { path: update, value: update });
-  }
-}
-for (const a of ["IPAddress", "MACAddress", "Active", "InterfaceType"]) {
-  declare("InternetGatewayDevice.LANDevice.1.Hosts.Host.*." + a, { path: update, value: update });
-}
-declare("InternetGatewayDevice.LANDevice.1.Hosts.Host.*.HostName", { path: slow, value: slow });
-
-// Rotate the rest (new WLAN instances, optional AD name leaf)
+// Rotate associated-device / hosts refresh (lighter than dumping all every time)
 if (phase === 0 || phase === 1) {
-  declare(
-    "InternetGatewayDevice.LANDevice.1.WLANConfiguration." + wlan + ".AssociatedDevice.*.AssociatedDeviceHostName",
-    { path: slow, value: slow }
-  );
-} else if (phase === 6 || phase === 7) {
+  refreshAdSlots(wlan, 8);
+} else if (phase === 2 || phase === 3) {
+  for (let i = 1; i <= 12; i++) {
+    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".IPAddress", {
+      path: update,
+      value: update,
+    });
+    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".MACAddress", {
+      path: update,
+      value: update,
+    });
+  }
+} else if (phase === 4 || phase === 5) {
+  for (let i = 1; i <= 12; i++) {
+    declare("InternetGatewayDevice.LANDevice.1.Hosts.Host." + i + ".HostName", {
+      path: slow,
+      value: slow,
+    });
+  }
+} else {
   declare("InternetGatewayDevice.LANDevice.*.WLANConfiguration.*.TotalAssociations", {
     path: update,
     value: update,
